@@ -9,7 +9,6 @@ body {
 img {
 	display: none;
 }
-
 svg {
 	display: none;
 }
@@ -21,8 +20,9 @@ canvas {
 .home {
 	height: 100vh;
 	background: url(./assets/background-home-v2.png);
-	/* background-size: 100% 100%; */
+	background-size: 100% 100%;
 	background-repeat: no-repeat;
+
 }
 
 .home .start-now {
@@ -32,4 +32,5 @@ canvas {
 	transform: translate(-50%, -50%);
 	padding: 16px;
 	cursor: pointer;
+	
 }

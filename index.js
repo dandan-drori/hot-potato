@@ -177,3 +177,9 @@ function positionLava() {
 function getRandomInt(min, max) {
 	return Math.floor(Math.random() * (Math.floor(max) - Math.ceil(min) + 1)) + Math.ceil(min);
 }
+
+
+function start() {
+	document.getElementById("home").style.display = "none";
+	document.getElementById("canvas").style.display = "block";
+}
