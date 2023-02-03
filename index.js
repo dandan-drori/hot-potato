@@ -160,6 +160,7 @@ async function jump() {
 		await sleep(10);
 	}
 	potato.gravity = 10;
+	potato.isOnGround = true;
 }
 
 async function sleep(ms) {

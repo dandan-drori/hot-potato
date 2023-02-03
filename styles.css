@@ -1,4 +1,7 @@
 body {
+	padding: 0;
+	margin: 0;
+	box-sizing: border-box;
 	overflow: hidden;
 	background-color: rgba(255, 255, 255, 0.1);
 }
@@ -7,6 +10,26 @@ img {
 	display: none;
 }
 
-svg:last-of-type {
+svg {
 	display: none;
+}
+
+canvas {
+	display: none;
+}
+
+.home {
+	height: 100vh;
+	background: url(./assets/background-home-v2.png);
+	/* background-size: 100% 100%; */
+	background-repeat: no-repeat;
+}
+
+.home .start-now {
+	position: absolute;
+	left: 50%;
+	top: 65%;
+	transform: translate(-50%, -50%);
+	padding: 16px;
+	cursor: pointer;
 }
