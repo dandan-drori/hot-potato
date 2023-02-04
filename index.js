@@ -180,6 +180,13 @@ function getRandomInt(min, max) {
 
 
 function start() {
+	document.getElementsByClassName("game-over-modal")[0].style.display = "none"
 	document.getElementById("home").style.display = "none";
-	document.getElementById("canvas").style.display = "block";
+	// document.getElementById("canvas").style.display = "block";
+	gameOverModal();
+}
+
+function gameOverModal() {
+	document.getElementsByClassName("game-over-modal")[0].style.display = "block"
+	document.getElementsByTagName("body")[0].style.backgroundColor = "rgba(0, 0, 0, 0.7)"
 }
