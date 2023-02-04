@@ -1,9 +1,7 @@
-
 @font-face {
-    font-family: 'Pixel Emulator';
-    src: url('/assets/fonts/PixelEmulator-xq08.ttf');
+	font-family: 'Pixel Emulator';
+	src: url('/assets/fonts/PixelEmulator-xq08.ttf');
 }
-
 
 body {
 	padding: 0;
@@ -39,22 +37,17 @@ canvas {
 	transform: translate(-50%, -50%);
 	padding: 10px 15px;
 	cursor: pointer;
-<<<<<<< Updated upstream
-	background-image: url("./assets/images/wood2.jpg");
-	object-fit:cover;
+	background-image: url('./assets/images/wood2.jpg');
+	object-fit: cover;
 	color: rgb(228, 197, 131);
 	border-radius: 10%;
-	font-family: "Pixel Emulator";
+	font-family: 'Pixel Emulator';
 	font-size: 30px;
 	letter-spacing: 3px;
-	
-=======
->>>>>>> Stashed changes
 }
 .home .start-now:hover {
 	background-color: rgb(99, 153, 153);
 }
-
 
 .game-over-modal {
 	display: flex;

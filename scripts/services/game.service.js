@@ -91,3 +91,8 @@ function start() {
 	generateLavaSurfaces();
 	captureKeyboardEvents();
 }
+
+function gameOverModal() {
+	document.getElementsByClassName('game-over-modal')[0].style.display = 'block';
+	document.getElementsByTagName('body')[0].style.backgroundColor = 'rgba(0, 0, 0, 0.7)';
+}
