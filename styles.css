@@ -37,7 +37,7 @@ canvas {
 	transform: translate(-50%, -50%);
 	padding: 10px 15px;
 	cursor: pointer;
-	background-image: url('./assets/images/wood2.jpg');
+	background-image: url('./assets/images/wood-button.jpg');
 	object-fit: cover;
 	color: rgb(228, 197, 131);
 	border-radius: 10%;

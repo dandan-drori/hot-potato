@@ -1,19 +1,21 @@
-class Lava {
-	constructor(x, y, width, height, element) {
+import { ctx } from '../services/canvas.service.js';
+
+export class Lava {
+	constructor(x, y, velocity, image) {
 		this.x = x;
 		this.y = y;
-		this.width = width;
-		this.height = height;
-		this.element = element;
+		this.image = image;
+		this.width = image.width;
+		this.height = image.height;
+		this.velocity = velocity;
 	}
 
 	draw() {
-		const img = new Image();
-		const xml = new XMLSerializer().serializeToString(this.element);
-		const svg64 = btoa(xml);
-		const b64Start = 'data:image/svg+xml;base64,';
-		const image64 = b64Start + svg64;
-		img.onload = () => ctx.drawImage(img, this.x, this.y);
-		img.src = image64;
+		ctx.drawImage(this.image, this.x, this.y);
+	}
+
+	update() {
+		this.draw();
+		this.x += this.velocity.x;
 	}
 }
