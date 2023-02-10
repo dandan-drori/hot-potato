@@ -1,5 +1,5 @@
 import { ctx, canvas, fitCanvasToWindow } from './scripts/services/canvas.service.js';
-import { keys, jumpState, captureKeyboardEvents } from './scripts/services/keyboard.service.js';
+import { keys, captureKeyboardEvents } from './scripts/services/keyboard.service.js';
 import {
 	init,
 	drawBackground,
@@ -29,19 +29,13 @@ function animate() {
 	startingSurface.update();
 	// If player collides with starting surface from above, stop falling
 	if (isCollided(potato, startingSurface)) {
-		jumpState.isOnGround = true;
-		jumpState.isJumping = false;
-		jumpState.isDoubleJumping = false;
-		potato.velocity.y = 0;
+		potato.land();
 	}
 	// If player collides with lava surfaces from above, stop falling
 	lavaSurfaces.forEach(lavaSurface => {
 		lavaSurface.update();
 		if (isCollided(potato, lavaSurface)) {
-			jumpState.isOnGround = true;
-			jumpState.isJumping = false;
-			jumpState.isDoubleJumping = false;
-			potato.velocity.y = 0;
+			potato.land();
 		}
 	});
 
