@@ -19,4 +19,5 @@ function animate() {
 	lavaSurfaces.forEach(lavaSurface => {
 		lavaSurface.draw();
 	});
+	placeAllRoots();
 }

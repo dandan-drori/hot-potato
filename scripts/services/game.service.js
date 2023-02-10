@@ -1,9 +1,12 @@
 // Draw the potato shape
 let animationId;
 const potatoSvg = document.getElementById('potato');
-const backgroundSvg = document.getElementById('background');
+const backgroundSvg = document.getElementById
+('background');
 const potatoWidth = getElementDimension(potatoSvg, 'width');
 const potatoHeight = getElementDimension(potatoSvg, 'height');
+var audio = document.getElementById("fluffing-a-duck");
+var jumpAudio = document.getElementById("jump-audio");
 const potato = new Potato(
 	100,
 	canvas.height / 2 - potatoHeight - DISTANCE_FROM_GROUND,
@@ -23,6 +26,7 @@ const startingSurface = new StartingSurface(
 	startingSurfaceHeight
 );
 const lavaSurfaces = [];
+const roots = [];
 let potatoLastState;
 
 function generateLavaSurfaces() {
@@ -38,6 +42,23 @@ function getRandomLavaElement() {
 	const newLavaElement = lavaElements[index].cloneNode(true);
 	lavaSurfacesContainer.appendChild(newLavaElement);
 	return newLavaElement;
+}
+
+function placeAllRoots() {
+	if (roots.length < 20) {
+		addRoots();
+	}
+	roots.forEach(root => root.draw())
+}
+
+function addRoots() {
+	const rootsSvg = document.getElementsByClassName('roots')[0];
+	const width = getElementDimension(rootsSvg, 'width');
+	const height = getElementDimension(rootsSvg, 'height');
+	const x = roots[roots.length - 1]?.x + width || 0;
+	const y = canvas.height - height;
+	const root = new Root(x, y, width, height);
+	roots.push(root);
 }
 
 function placeLavaSurface() {
@@ -67,13 +88,15 @@ async function move(direction, isUp) {
 		potato.x += diff;
 	}
 	if (isUp) {
-		await jump();
+		await start();
 	}
 }
 
 async function jump() {
 	if (!potato.isOnGround) return;
 	potato.isOnGround = false;
+	jumpAudio.play()
+	console.log('jump')
 	potato.gravity = 0;
 	for (let i = 0; i < 30; i++) {
 		potato.y -= 7;
@@ -83,16 +106,35 @@ async function jump() {
 	potato.isOnGround = true;
 }
 
+
+
 // Init
 function start() {
+	audio.play()
+	audio.volume = 0.3;
 	document.getElementById('home').style.display = 'none';
 	document.getElementById('canvas').style.display = 'block';
-	window.requestAnimationFrame(animate);
+	document.getElementsByClassName('game-over-modal')[0].style.display = 'none';
+	window.requestAnimationFrame(animate);	
 	generateLavaSurfaces();
 	captureKeyboardEvents();
 }
+function liveWithMyShame() {
+	document.getElementById('home').style.display = 'block';
+	document.getElementsByClassName('game-over-modal')[0].style.display = 'none';
 
-function gameOverModal() {
-	document.getElementsByClassName('game-over-modal')[0].style.display = 'block';
-	document.getElementsByTagName('body')[0].style.backgroundColor = 'rgba(0, 0, 0, 0.7)';
 }
+function gameOverModal() {
+	document.getElementsByClassName('game-over-modal')[0].style.display = 'flex';
+	document.getElementsByTagName('body')[0].style.backgroundColor = 'rgba(0, 0, 0, 0.7)';
+	const sadPotato = document.getElementById('sad-potato');
+	const img = new Image();
+	const xml = new XMLSerializer().serializeToString(sadPotato);
+	const svg64 = btoa(xml);
+	const b64Start = 'data:image/svg+xml;base64,';
+	const image64 = b64Start + svg64;
+	img.onload = () => ctx.drawImage(img, canvas.width / 2, canvas.height / 2);
+	img.src = image64;
+	sadPotato.style.display = 'block';
+}
+gameOverModal()
