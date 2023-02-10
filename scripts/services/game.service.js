@@ -24,9 +24,7 @@ export function init() {
 		{ x: 0, y: 0 },
 		image
 	);
-	const img = new Image();
-	img.src = IMAGES.startingSurface;
-	startingSurface = new StartingSurface(100, canvas.height / 2, { x: 0, y: 0 }, img);
+	startingSurface = new StartingSurface(100, canvas.height / 2, { x: 0, y: 0 });
 	lavaSurfaces = [];
 }
 
@@ -57,7 +55,7 @@ export function placeLavaSurface() {
 	const image = new Image();
 	const lavaSurfaceOption = LAVA_SURFACES_OPTIONS[index];
 	image.src = IMAGES[lavaSurfaceOption];
-	const lava = new Lava(x, y, { x: 0, y: 0 }, image);
+	const lava = new Lava(x, y, { x: 0, y: 0 });
 	lavaSurfaces.push(lava);
 }
 

@@ -14,20 +14,21 @@ import {
 
 const scoreEl = document.querySelector('.score');
 
+function isCollided(potato, surface) {
+	return potato.y + potato.height <= surface.y &&
+		potato.y + potato.height + potato.velocity.y >= surface.y &&
+		potato.x + potato.width >= surface.x &&
+		potato.x <= surface.x + surface.width
+}
+
 function animate() {
 	game.animationId = requestAnimationFrame(animate);
 	ctx.fillStyle = 'rgba(255,255,255,0.1)';
 	ctx.fillRect(0, 0, canvas.width, canvas.height);
 	drawBackground();
-	potato.update();
 	startingSurface.update();
 	// If player collides with starting surface from above, stop falling
-	if (
-		potato.y + potato.height <= startingSurface.y &&
-		potato.y + potato.height + potato.velocity.y >= startingSurface.y &&
-		potato.x + potato.width >= startingSurface.x &&
-		potato.x <= startingSurface.x + startingSurface.width
-	) {
+	if (isCollided(potato, startingSurface)) {
 		jumpState.isOnGround = true;
 		jumpState.isJumping = false;
 		jumpState.isDoubleJumping = false;
@@ -36,12 +37,7 @@ function animate() {
 	// If player collides with lava surfaces from above, stop falling
 	lavaSurfaces.forEach(lavaSurface => {
 		lavaSurface.update();
-		if (
-			potato.y + potato.height <= lavaSurface.y &&
-			potato.y + potato.height + potato.velocity.y >= lavaSurface.y &&
-			potato.x + potato.width >= lavaSurface.x &&
-			potato.x <= lavaSurface.x + lavaSurface.width
-		) {
+		if (isCollided(potato, lavaSurface)) {
 			jumpState.isOnGround = true;
 			jumpState.isJumping = false;
 			jumpState.isDoubleJumping = false;
@@ -77,6 +73,8 @@ function animate() {
 	if (potato.y + potato.velocity.y <= 0) {
 		potato.velocity.y = 0;
 	}
+
+	potato.update();
 }
 
 export function start() {
