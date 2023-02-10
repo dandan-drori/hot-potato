@@ -2,6 +2,17 @@
 export const canvas = document.getElementById('canvas');
 export const ctx = canvas.getContext('2d');
 
-// Set the canvas size
-canvas.width = innerWidth;
-canvas.height = innerHeight;
+function modifyCanvasDimensions() {
+	canvas.width = innerWidth;
+	canvas.height = innerHeight;
+}
+
+modifyCanvasDimensions();
+
+export function fitCanvasToWindow() {
+	addEventListener('resize', modifyCanvasDimensions);
+}
+
+export function removeResizeListener() {
+	removeEventListener('resize', modifyCanvasDimensions);
+}

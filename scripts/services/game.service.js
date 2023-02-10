@@ -3,11 +3,17 @@ import { Potato } from '../entities/Potato.js';
 import { Lava } from '../entities/Lava.js';
 import { StartingSurface } from '../entities/StartingSurface.js';
 import { DISTANCE_FROM_GROUND, IMAGES, LAVA_SURFACES_OPTIONS } from '../constants/constants.js';
-import { ctx, canvas } from '../services/canvas.service.js';
+import { ctx, canvas, removeResizeListener } from '../services/canvas.service.js';
+import { clearEventListeners, keys } from './keyboard.service.js';
+import { getHighscore, saveScore } from './score.service.js';
 
 export let potato;
 export let startingSurface;
 export let lavaSurfaces;
+export let game = {
+	animationId: null,
+	scrollOffset: 0,
+};
 
 export function init() {
 	const image = new Image();
@@ -56,8 +62,21 @@ export function placeLavaSurface() {
 }
 
 export function gameOverModal() {
-	document.getElementsByClassName('game-over-modal')[0].style.display = 'block';
+	document.getElementsByClassName('game-over-modal')[0].style.display = 'flex';
 	document.getElementsByTagName('body')[0].style.backgroundColor = 'rgba(0, 0, 0, 0.7)';
+}
+
+export function gameOver() {
+	cancelAnimationFrame(game.animationId);
+	gameOverModal();
+	removeResizeListener();
+	clearEventListeners();
+	saveScore(game.scrollOffset);
+	document.querySelector('.highscore').innerText = getHighscore();
+	// fixes bug where after clicking "play again", if one of the arrows was still pressed upon death,
+	// the potato starts moving without pressing any key
+	keys.right.pressed = false;
+	keys.left.pressed = false;
 }
 
 export function drawBackground() {

@@ -1,5 +1,6 @@
 import { GRAVITY } from '../constants/constants.js';
 import { ctx } from '../services/canvas.service.js';
+import { gameOver } from '../services/game.service.js';
 import { jumpState } from '../services/keyboard.service.js';
 
 export class Potato {
@@ -28,6 +29,7 @@ export class Potato {
 			jumpState.isJumping = false;
 			jumpState.isDoubleJumping = false;
 			this.velocity.y = 0;
+			gameOver();
 		}
 	}
 }

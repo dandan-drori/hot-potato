@@ -1,4 +1,4 @@
-import { ctx, canvas } from './scripts/services/canvas.service.js';
+import { ctx, canvas, fitCanvasToWindow } from './scripts/services/canvas.service.js';
 import { keys, jumpState, captureKeyboardEvents } from './scripts/services/keyboard.service.js';
 import {
 	init,
@@ -7,16 +7,15 @@ import {
 	startingSurface,
 	lavaSurfaces,
 	generateLavaSurfaces,
+	game,
 } from './scripts/services/game.service.js';
-import { FLOWERS_HEIGHT } from './scripts/constants/constants.js';
 
 // Draw the roots (Thorns)
 
-let scrollOffset = 0;
-let animationId;
+const scoreEl = document.querySelector('.score');
 
 function animate() {
-	animationId = requestAnimationFrame(animate);
+	game.animationId = requestAnimationFrame(animate);
 	ctx.fillStyle = 'rgba(255,255,255,0.1)';
 	ctx.fillRect(0, 0, canvas.width, canvas.height);
 	drawBackground();
@@ -57,12 +56,13 @@ function animate() {
 		potato.velocity.x = -5;
 	} else {
 		if (keys.right.pressed) {
-			scrollOffset += 5;
+			game.scrollOffset += 5;
 			startingSurface.x -= 5;
 		} else if (keys.left.pressed) {
-			scrollOffset -= 5;
+			game.scrollOffset -= 5;
 			startingSurface.x += 5;
 		}
+		scoreEl.innerText = game.scrollOffset;
 		lavaSurfaces.forEach(lavaSurface => {
 			if (keys.right.pressed) {
 				lavaSurface.x -= 5;
@@ -73,18 +73,34 @@ function animate() {
 		potato.velocity.x = 0;
 	}
 
-	if (scrollOffset >= 2000) {
-		console.log('You Win');
+	// If player collides with the ceiling, reset his vertical speed
+	if (potato.y + potato.velocity.y <= 0) {
+		potato.velocity.y = 0;
 	}
 }
 
 export function start() {
+	document.querySelector('.game-over-modal').style.display = 'none';
 	document.getElementById('home').style.display = 'none';
-	document.getElementById('canvas').style.display = 'block';
+	document.querySelector('.score-container').style.display = 'block';
 	init();
 	requestAnimationFrame(animate);
 	generateLavaSurfaces();
 	captureKeyboardEvents();
+	fitCanvasToWindow();
+	removeEventListener('keyup', startOnSpace);
+	game.scrollOffset = 0;
+	scoreEl.innerText = game.scrollOffset;
 }
 
 document.querySelector('.button.start-now').addEventListener('click', start);
+
+document.querySelector('button.play-again').addEventListener('click', start);
+
+addEventListener('keyup', startOnSpace);
+
+function startOnSpace({ key }) {
+	if (key === ' ') {
+		start();
+	}
+}
