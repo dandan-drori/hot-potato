@@ -1,11 +1,12 @@
 import {Platform} from "./Platform.js"
-import {IMAGES} from "../constants/constants.js";
 
 export class Lava extends Platform {
 	constructor(x, y, velocity) {
 		const image = new Image();
-		image.src = IMAGES.lavaSurfaceSmall
+		image.src = '../../assets/images/lava-surface-loop/lava.png'
+		const decorationImage = new Image();
+		decorationImage.src = '../../assets/images/lava-surface-loop/spikes.png'
 
-		super(x, y, velocity, image, image);
+		super(x, y, velocity, image, decorationImage);
 	}
 }

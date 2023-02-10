@@ -14,7 +14,7 @@ export class Platform {
     draw() {
         ctx.drawImage(this.image, this.x, this.y);
         if (this.decorationImage) {
-            ctx.drawImage(this.decorationImage, this.x, this.y - this.height);
+            ctx.drawImage(this.decorationImage, this.x, this.y - this.decorationImage.height);
         }
     }
 
