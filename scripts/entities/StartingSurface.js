@@ -1,19 +1,21 @@
-class StartingSurface {
-	constructor(x, y, width, height, element) {
+import { ctx } from '../services/canvas.service.js';
+
+export class StartingSurface {
+	constructor(x, y, velocity, image) {
 		this.x = x;
 		this.y = y;
-		this.width = width;
-		this.height = height;
+		this.image = image;
+		this.width = image.width;
+		this.height = image.height;
+		this.velocity = velocity;
 	}
 
 	draw() {
-		const img = new Image();
-		const startingSurfaceSvg = document.getElementById('starting-surface');
-		const xml = new XMLSerializer().serializeToString(startingSurfaceSvg);
-		const svg64 = btoa(xml);
-		const b64Start = 'data:image/svg+xml;base64,';
-		const image64 = b64Start + svg64;
-		img.onload = () => ctx.drawImage(img, this.x, this.y);
-		img.src = image64;
+		ctx.drawImage(this.image, this.x, this.y);
+	}
+
+	update() {
+		this.draw();
+		this.x += this.velocity.x;
 	}
 }

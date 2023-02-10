@@ -1,32 +1,61 @@
-function captureKeyboardEvents() {
-	const keysPressed = {};
-	const movementFunctions = {
-		ArrowLeft: async () => move('left'),
-		ArrowRight: async () => move('right'),
-		Space: async () => move('', true),
-		LeftUp: async () => move('left', true),
-		RightUp: async () => move('right', true),
-	};
-	window.addEventListener('keydown', async event => {
-		keysPressed[event.key] = event.key;
+import { potato } from './game.service.js';
 
-		if (event.code === 'Space') {
-			await movementFunctions.Space();
-		} else {
-			await movementFunctions?.[event.key]?.();
-		}
+export const keys = {
+	left: {
+		pressed: false,
+	},
+	right: {
+		pressed: false,
+	},
+};
 
-		if (keysPressed['ArrowRight'] && event.code === 'Space') {
-			await movementFunctions?.RightUp?.();
-		}
+export const jumpState = {
+	isOnGround: true,
+	isJumping: false,
+	isDoubleJumping: false,
+};
 
-		if (keysPressed['ArrowLeft'] && event.code === 'Space') {
-			await movementFunctions?.LeftUp?.();
-		}
-	});
+function onKeyDown({ key }) {
+	switch (key) {
+		case 'ArrowLeft':
+			keys.left.pressed = true;
+			break;
+		case 'ArrowRight':
+			keys.right.pressed = true;
+			break;
+		case ' ':
+			if (jumpState.isDoubleJumping) return;
+			if (jumpState.isJumping) {
+				jumpState.isOnGround = false;
+				jumpState.isJumping = false;
+				jumpState.isDoubleJumping = true;
+			} else {
+				jumpState.isOnGround = false;
+				jumpState.isJumping = true;
+				jumpState.isDoubleJumping = false;
+			}
+			potato.velocity.y -= 15;
+			break;
+	}
+}
 
-	// remove pressed keys from object
-	window.addEventListener('keyup', event => {
-		delete keysPressed[event.key];
-	});
+function onKeyUp({ key }) {
+	switch (key) {
+		case 'ArrowLeft':
+			keys.left.pressed = false;
+			break;
+		case 'ArrowRight':
+			keys.right.pressed = false;
+			break;
+	}
+}
+
+export function captureKeyboardEvents() {
+	addEventListener('keydown', onKeyDown);
+	addEventListener('keyup', onKeyUp);
+}
+
+export function clearEventListeners() {
+	removeEventListener('keydown', onKeyDown);
+	removeEventListener('keyup', onKeyUp);
 }
