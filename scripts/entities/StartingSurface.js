@@ -1,21 +1,12 @@
-import { ctx } from '../services/canvas.service.js';
+import {Platform} from "./Platform.js";
+import {IMAGES} from "../constants/constants.js";
 
-export class StartingSurface {
-	constructor(x, y, velocity, image) {
-		this.x = x;
-		this.y = y;
-		this.image = image;
-		this.width = image.width;
-		this.height = image.height;
-		this.velocity = velocity;
-	}
+export class StartingSurface extends Platform {
+	constructor(x, y, velocity) {
+		const image = new Image();
+		image.src = IMAGES.startingSurface
 
-	draw() {
-		ctx.drawImage(this.image, this.x, this.y);
-	}
-
-	update() {
-		this.draw();
-		this.x += this.velocity.x;
+		super(x, y, velocity, image, image);
 	}
 }
+
