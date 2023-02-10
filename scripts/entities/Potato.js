@@ -32,4 +32,11 @@ export class Potato {
 			gameOver();
 		}
 	}
+
+	getDimensions() {
+		return {
+			width: this.image.width,
+			height: this.image.height,
+		};
+	}
 }

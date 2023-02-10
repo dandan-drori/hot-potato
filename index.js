@@ -15,10 +15,14 @@ import {
 const scoreEl = document.querySelector('.score');
 
 function isCollided(potato, surface) {
-	return potato.y + potato.height <= surface.y &&
-		potato.y + potato.height + potato.velocity.y >= surface.y &&
-		potato.x + potato.width >= surface.x &&
+	const { width, height } = potato.getDimensions();
+
+	return (
+		potato.y + height <= surface.y &&
+		potato.y + height + potato.velocity.y >= surface.y &&
+		potato.x + width >= surface.x &&
 		potato.x <= surface.x + surface.width
+	);
 }
 
 function animate() {
@@ -58,7 +62,9 @@ function animate() {
 			game.scrollOffset -= 5;
 			startingSurface.x += 5;
 		}
-		scoreEl.innerText = game.scrollOffset;
+		if (game.scrollOffset >= 0) {
+			scoreEl.innerText = game.scrollOffset;
+		}
 		lavaSurfaces.forEach(lavaSurface => {
 			if (keys.right.pressed) {
 				lavaSurface.x -= 5;

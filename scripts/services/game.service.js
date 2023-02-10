@@ -62,15 +62,6 @@ export function placeLavaSurface() {
 export function gameOverModal() {
 	document.getElementsByClassName('game-over-modal')[0].style.display = 'flex';
 	document.getElementsByTagName('body')[0].style.backgroundColor = 'rgba(0, 0, 0, 0.7)';
-	const sadPotato = document.getElementById('sad-potato');
-	const img = new Image();
-	const xml = new XMLSerializer().serializeToString(sadPotato);
-	const svg64 = btoa(xml);
-	const b64Start = 'data:image/svg+xml;base64,';
-	const image64 = b64Start + svg64;
-	img.onload = () => ctx.drawImage(img, canvas.width / 2, canvas.height / 2);
-	img.src = image64;
-	sadPotato.style.display = 'block';
 }
 
 export function gameOver() {
