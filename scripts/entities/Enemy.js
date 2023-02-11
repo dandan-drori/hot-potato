@@ -1,8 +1,5 @@
 import { ctx } from '../services/canvas.service.js';
-import {
-	isFallingOffLeftEdge,
-	isFallingOffRightEdge,
-} from '../services/util.service.js';
+import { isFallingOffLeftEdge, isFallingOffRightEdge } from '../services/util.service.js';
 import { DimensionImageEntity } from './DimensionImageEntity.js';
 
 export class Enemy extends DimensionImageEntity {
@@ -10,7 +7,7 @@ export class Enemy extends DimensionImageEntity {
 		super(image);
 		this.x = x;
 		this.y = y;
-		this.platform = null
+		this.platform = null;
 		this.velocity = velocity;
 	}
 
@@ -24,9 +21,9 @@ export class Enemy extends DimensionImageEntity {
 		this.y += this.velocity.y;
 
 		if (isFallingOffLeftEdge(this, this.platform, this.width / 2)) {
-			this.velocity.x = 3;
+			this.velocity.x = 2;
 		} else if (isFallingOffRightEdge(this, this.platform, this.width / 2)) {
-			this.velocity.x = -3;
+			this.velocity.x = -2;
 		}
 	}
 
@@ -36,6 +33,6 @@ export class Enemy extends DimensionImageEntity {
 
 	patrolPlatform(platform) {
 		this.velocity.x = 3;
-		this.platform = platform
+		this.platform = platform;
 	}
 }

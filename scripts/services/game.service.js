@@ -52,7 +52,9 @@ export function placeLavaSurface() {
 	lavaSurfaces.push(lava);
 	if (lava.width > 100 && !getRandomInt(0, 5)) {
 		const spider = new SpiderEnemy(lava.x + 20, lava.y, { x: 0, y: 0 });
-		spider.adjustPositionRelativeToPlatform(lava);
+		spider.onImageLoad = () => {
+			spider.adjustPositionRelativeToPlatform(lava);
+		};
 		spider.setOnDestroy(enemyInstance => {
 			const idx = lava.enemies.indexOf(enemyInstance);
 			lava.enemies.splice(idx, 1);

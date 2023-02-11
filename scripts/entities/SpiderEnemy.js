@@ -9,7 +9,10 @@ export class SpiderEnemy extends Enemy {
 	}
 
 	adjustPositionRelativeToPlatform(lava) {
+		console.log(this.height);
 		this.y -= this.height;
 		this.x = getRandomInt(lava.x, lava.x + lava.width - this.width);
+
+		console.log();
 	}
 }
