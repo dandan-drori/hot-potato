@@ -45,6 +45,10 @@ export function placeLavaSurface() {
 	const nextYMin = lastLavaSurface.y - 500 < 0 ? lastLavaSurface.y + 500 : lastLavaSurface.y - 400;
 	const y = getRandomInt(nextYMin, nextYMax);
 	const lava = new Lava(x, y, { x: 0, y: 0 }, Math.floor(Math.random() * 300) + 100);
+	lava.setOnDestroy(lavaInstance => {
+		const idx = lavaSurfaces.indexOf(lavaInstance);
+		lavaSurfaces.splice(idx, 1);
+	});
 	lavaSurfaces.push(lava);
 }
 
