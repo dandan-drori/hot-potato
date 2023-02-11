@@ -43,10 +43,6 @@ export class Platform extends DimensionImageEntity {
 
 	update() {
 		this.x += this.velocity.x;
-		this.alpha += this.alphaChangeSpeed;
-		this.alpha = this.alpha >= 1 ? 1 : this.alpha <= 0.5 ? 0.5 : this.alpha;
-		ctx.globalAlpha = this.alpha;
 		this.draw();
-		ctx.globalAlpha = 1;
 	}
 }

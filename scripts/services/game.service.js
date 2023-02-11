@@ -8,7 +8,6 @@ import { clearEventListeners, keys } from './keyboard.service.js';
 import { getHighscore, saveScore } from './score.service.js';
 
 export let potato;
-export let startingSurface;
 export let lavaSurfaces;
 export let game = {
 	animationId: null,
@@ -17,12 +16,8 @@ export let game = {
 };
 
 export function init() {
-	potato = new Potato(
-		100,
-		0,
-		{ x: 0, y: 0 },
-	);
-	startingSurface = new StartingSurface(100, canvas.height / 2, { x: 0, y: 0 });
+	potato = new Potato(100, 0, { x: 0, y: 0 });
+	const startingSurface = new StartingSurface(100, canvas.height / 2, { x: 0, y: 0 });
 	lavaSurfaces = [startingSurface];
 }
 
@@ -49,7 +44,7 @@ export function placeLavaSurface() {
 		lastLavaSurface.y + 700 > canvas.height ? lastLavaSurface.y - 200 : lastLavaSurface.y + 600;
 	const nextYMin = lastLavaSurface.y - 500 < 0 ? lastLavaSurface.y + 500 : lastLavaSurface.y - 400;
 	const y = getRandomInt(nextYMin, nextYMax);
-	const lava = new Lava(x, y, { x: 0, y: 0 }, Math.floor(Math.random() * 300) + 100 );
+	const lava = new Lava(x, y, { x: 0, y: 0 }, Math.floor(Math.random() * 300) + 100);
 	lavaSurfaces.push(lava);
 }
 
