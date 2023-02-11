@@ -33,19 +33,23 @@ export function isFallingOffTheEdge(entity, platform) {
 	return isFallingOffRightEdge(entity, platform) || isFallingOffLeftEdge(entity, platform);
 }
 
-export function isFallingOffLeftEdge(entity, platform) {
+export function isFallingOffLeftEdge(entity, platform, entityWidth) {
+	const x = entity.x + (entityWidth ?? entity.width)
+
 	return (
-		entity.x + entity.width >= platform.x &&
-		entity.x + entity.width + entity.velocity.x <= platform.x &&
+		x >= platform.x &&
+		x + entity.velocity.x <= platform.x &&
 		entity.y + entity.height <= platform.y &&
 		entity.y + entity.height + entity.velocity.y >= platform.y
 	);
 }
 
-export function isFallingOffRightEdge(entity, platform) {
+export function isFallingOffRightEdge(entity, platform, entityWidth) {
+	const x = entity.x + (entityWidth ?? 0);
+
 	return (
-		entity.x <= platform.x + platform.width &&
-		entity.x + entity.velocity.x >= platform.x + platform.width + platform.velocity.x &&
+		x <= platform.x + platform.width &&
+		x + entity.velocity.x >= platform.x + platform.width + platform.velocity.x &&
 		entity.y + entity.height + 5 >= platform.y &&
 		entity.y <= platform.y + platform.height
 	);
