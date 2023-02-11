@@ -1,5 +1,4 @@
 import { Platform } from './Platform.js';
-import { IMAGES } from '../constants/constants.js';
 
 export class StartingSurface extends Platform {
 	constructor(x, y, velocity) {

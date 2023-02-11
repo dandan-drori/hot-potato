@@ -15,12 +15,10 @@ import {
 const scoreEl = document.querySelector('.score');
 
 function isCollided(potato, surface) {
-	const { width, height } = potato.getDimensions();
-
 	return (
-		potato.y + height <= surface.y &&
-		potato.y + height + potato.velocity.y >= surface.y &&
-		potato.x + width >= surface.x &&
+		potato.y + potato.height <= surface.y &&
+		potato.y + potato.height + potato.velocity.y >= surface.y &&
+		potato.x + potato.width >= surface.x &&
 		potato.x <= surface.x + surface.width
 	);
 }
@@ -31,6 +29,8 @@ function animate() {
 	ctx.fillRect(0, 0, canvas.width, canvas.height);
 	drawBackground();
 	startingSurface.update();
+	if (!potato.initialized || !startingSurface.initialized) return;
+
 	// If player collides with starting surface from above, stop falling
 	if (isCollided(potato, startingSurface)) {
 		potato.land();
