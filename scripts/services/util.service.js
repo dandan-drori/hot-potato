@@ -14,7 +14,7 @@ export function isCollided(potato, surface) {
 export function isCollidedFromLeft(potato, enemy) {
 	return (
 		potato.x + potato.width <= enemy.x &&
-		potato.x + potato.width + potato.velocity.x >= enemy.x &&
+		potato.x + potato.width + (potato.velocity.x || 5) >= enemy.x &&
 		potato.y + potato.height >= enemy.y &&
 		potato.y <= enemy.y + enemy.height
 	);
@@ -26,5 +26,36 @@ export function isCollidedFromRight(potato, enemy) {
 		potato.x + potato.velocity.x <= enemy.x + enemy.width &&
 		potato.y + potato.height >= enemy.y &&
 		potato.y <= enemy.y + enemy.height
+	);
+}
+
+export function isFallingOffTheEdge(entity, platform) {
+	return isFallingOffRightEdge(entity, platform) || isFallingOffLeftEdge(entity, platform);
+}
+
+export function isFallingOffLeftEdge(entity, platform) {
+	return (
+		entity.x + entity.width >= platform.x &&
+		entity.x + entity.width + entity.velocity.x <= platform.x &&
+		entity.y + entity.height <= platform.y &&
+		entity.y + entity.height + entity.velocity.y >= platform.y
+	);
+}
+
+export function isFallingOffRightEdge(entity, platform) {
+	return (
+		entity.x <= platform.x + platform.width &&
+		entity.x + entity.velocity.x >= platform.x + platform.width + platform.velocity.x &&
+		entity.y + entity.height + 5 >= platform.y &&
+		entity.y <= platform.y + platform.height
+	);
+}
+
+export function didHitPlatformEdge() {
+	return (
+		entity.x <= platform.x + platform.width &&
+		entity.x + entity.velocity.x >= platform.x + platform.width &&
+		entity.y + entity.height + 5 >= platform.y &&
+		entity.y <= platform.y + platform.height
 	);
 }

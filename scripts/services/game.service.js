@@ -3,7 +3,7 @@ import { Potato } from '../entities/Potato.js';
 import { Lava } from '../entities/Lava.js';
 import { StartingSurface } from '../entities/StartingSurface.js';
 import { ctx, canvas, removeResizeListener } from './canvas.service.js';
-import { clearEventListeners, keys } from './keyboard.service.js';
+import { addSpacePressListener, clearEventListeners, keys } from './keyboard.service.js';
 import { getHighscore, saveScore } from './score.service.js';
 import { SpiderEnemy } from '../entities/SpiderEnemy.js';
 
@@ -57,6 +57,7 @@ export function placeLavaSurface() {
 			const idx = lava.enemies.indexOf(enemyInstance);
 			lava.enemies.splice(idx, 1);
 		});
+		spider.patrolPlatform(lava);
 		lava.addEnemy(spider);
 	}
 }
@@ -64,6 +65,7 @@ export function placeLavaSurface() {
 export function gameOverModal() {
 	document.getElementsByClassName('game-over-modal')[0].style.display = 'flex';
 	document.getElementsByTagName('body')[0].style.backgroundColor = 'rgba(0, 0, 0, 0.7)';
+	addSpacePressListener();
 }
 
 export function gameOver() {

@@ -1,3 +1,4 @@
+import { start } from '../../index.js';
 import { potato } from './game.service.js';
 
 export const keys = {
@@ -42,4 +43,24 @@ export function captureKeyboardEvents() {
 export function clearEventListeners() {
 	removeEventListener('keydown', onKeyDown);
 	removeEventListener('keyup', onKeyUp);
+}
+
+export function onSpacePress({ key }) {
+	if (key === ' ') {
+		start();
+		removeEventListener('keyup', onSpacePress);
+		removeEventListener('keyup', startOnSpace);
+	}
+}
+
+export function startOnSpace({ key }) {
+	if (key === ' ') {
+		start();
+		removeEventListener('keyup', onSpacePress);
+		removeEventListener('keyup', startOnSpace);
+	}
+}
+
+export function addSpacePressListener() {
+	addEventListener('keyup', onSpacePress);
 }

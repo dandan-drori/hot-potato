@@ -1,6 +1,6 @@
 import { AHEAD_WINDOW, DISCARD_AFTER, INITIAL_WINDOW } from './scripts/constants/constants.js';
 import { ctx, canvas, fitCanvasToWindow } from './scripts/services/canvas.service.js';
-import { keys, captureKeyboardEvents } from './scripts/services/keyboard.service.js';
+import { keys, captureKeyboardEvents, startOnSpace } from './scripts/services/keyboard.service.js';
 import {
 	init,
 	drawBackground,
@@ -14,6 +14,7 @@ import {
 	isCollided,
 	isCollidedFromLeft,
 	isCollidedFromRight,
+	isFallingOffTheEdge,
 } from './scripts/services/util.service.js';
 
 // Draw the roots (Thorns)
@@ -60,6 +61,12 @@ function animate() {
 
 			potato.land();
 			game.latestLandingSurface = lavaSurface;
+		}
+
+		// If player is falling of the edge of the platform, "waste" a jump
+		if (isFallingOffTheEdge(potato, lavaSurface)) {
+			console.log('?!?');
+			potato.jump();
 		}
 	});
 
@@ -110,14 +117,21 @@ export function start() {
 	scoreEl.innerText = game.score;
 }
 
+function goToHome() {
+	document.querySelector('.game-over-modal').style.display = 'none';
+	document.querySelector('.score-container').style.display = 'none';
+	document.getElementById('home').style.display = 'block';
+}
+
 document.querySelector('.button.start-now').addEventListener('click', start);
 
 document.querySelector('button.play-again').addEventListener('click', start);
 
-addEventListener('keyup', startOnSpace);
+document.querySelector('button.cancel').addEventListener('click', goToHome);
 
-function startOnSpace({ key }) {
-	if (key === ' ') {
-		start();
+window.onload = () => {
+	if (document.getElementById('home').style.display === 'none') {
+		return;
 	}
-}
+	addEventListener('keyup', startOnSpace);
+};

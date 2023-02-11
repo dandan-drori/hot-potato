@@ -53,7 +53,7 @@ export class Potato extends DimensionImageEntity {
 			return;
 		}
 		this.jumpCount += 1;
-		this.velocity.y = -15;
+		this.velocity.y = isEnemyHit ? -10 : -15;
 
 		let avatar = AVATARS[this.jumpCount];
 		if (!Array.isArray(avatar)) {
