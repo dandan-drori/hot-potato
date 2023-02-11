@@ -4,7 +4,6 @@ import {
 	init,
 	drawBackground,
 	potato,
-	startingSurface,
 	lavaSurfaces,
 	generateLavaSurfaces,
 	game,
@@ -15,12 +14,10 @@ import {
 const scoreEl = document.querySelector('.score');
 
 function isCollided(potato, surface) {
-	const { width, height } = potato.getDimensions();
-
 	return (
-		potato.y + height <= surface.y &&
-		potato.y + height + potato.velocity.y >= surface.y &&
-		potato.x + width >= surface.x &&
+		potato.y + potato.height <= surface.y &&
+		potato.y + potato.height + potato.velocity.y >= surface.y &&
+		potato.x + potato.width >= surface.x &&
 		potato.x <= surface.x + surface.width
 	);
 }
@@ -30,15 +27,13 @@ function animate() {
 	ctx.fillStyle = 'rgba(255,255,255,0.1)';
 	ctx.fillRect(0, 0, canvas.width, canvas.height);
 	drawBackground();
-	startingSurface.update();
-	// If player collides with starting surface from above, stop falling
-	if (isCollided(potato, startingSurface)) {
-		potato.land();
-	}
 	// If player collides with lava surfaces from above, stop falling
 	lavaSurfaces.forEach(lavaSurface => {
 		lavaSurface.update();
 		if (isCollided(potato, lavaSurface)) {
+			if (lavaSurface.alphaCounter === 0) {
+				lavaSurface?.startBlinking();
+			}
 			potato.land();
 		}
 	});
@@ -50,14 +45,11 @@ function animate() {
 		potato.velocity.x = -5;
 	} else {
 		if (keys.right.pressed) {
-			game.scrollOffset += 5;
-			startingSurface.x -= 5;
+			game.score += 5;
 		} else if (keys.left.pressed) {
-			game.scrollOffset -= 5;
-			startingSurface.x += 5;
 		}
-		if (game.scrollOffset >= 0) {
-			scoreEl.innerText = game.scrollOffset;
+		if (game.score >= 0) {
+			scoreEl.innerText = game.score;
 		}
 		lavaSurfaces.forEach(lavaSurface => {
 			if (keys.right.pressed) {
@@ -87,8 +79,8 @@ export function start() {
 	captureKeyboardEvents();
 	fitCanvasToWindow();
 	removeEventListener('keyup', startOnSpace);
-	game.scrollOffset = 0;
-	scoreEl.innerText = game.scrollOffset;
+	game.score = 0;
+	scoreEl.innerText = game.score;
 }
 
 document.querySelector('.button.start-now').addEventListener('click', start);

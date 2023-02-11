@@ -13,6 +13,7 @@ export let lavaSurfaces;
 export let game = {
 	animationId: null,
 	scrollOffset: 0,
+	score: 0,
 };
 
 export function init() {
@@ -25,7 +26,7 @@ export function init() {
 		image
 	);
 	startingSurface = new StartingSurface(100, canvas.height / 2, { x: 0, y: 0 });
-	lavaSurfaces = [];
+	lavaSurfaces = [startingSurface];
 }
 
 export function generateLavaSurfaces() {
@@ -69,7 +70,7 @@ export function gameOver() {
 	gameOverModal();
 	removeResizeListener();
 	clearEventListeners();
-	saveScore(game.scrollOffset);
+	saveScore(game.score);
 	document.querySelector('.highscore').innerText = getHighscore();
 	// fixes bug where after clicking "play again", if one of the arrows was still pressed upon death,
 	// the potato starts moving without pressing any key

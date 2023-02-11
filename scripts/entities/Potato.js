@@ -44,11 +44,4 @@ export class Potato {
 		this.jumpCount = 0;
 		this.velocity.y = 0;
 	}
-
-	getDimensions() {
-		return {
-			width: this.image.width,
-			height: this.image.height,
-		};
-	}
 }
