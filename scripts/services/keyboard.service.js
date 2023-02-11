@@ -45,22 +45,17 @@ export function clearEventListeners() {
 	removeEventListener('keyup', onKeyUp);
 }
 
-export function onSpacePress({ key }) {
-	if (key === ' ') {
-		start();
-		removeEventListener('keyup', onSpacePress);
-		removeEventListener('keyup', startOnSpace);
-	}
+export function resetGame() {
+	start();
+	removeEventListener('keyup', startOnPress);
 }
 
-export function startOnSpace({ key }) {
+export function startOnPress({ key }) {
 	if (key === ' ') {
-		start();
-		removeEventListener('keyup', onSpacePress);
-		removeEventListener('keyup', startOnSpace);
+		resetGame()
 	}
 }
 
 export function addSpacePressListener() {
-	addEventListener('keyup', onSpacePress);
+	addEventListener('keyup', startOnPress);
 }

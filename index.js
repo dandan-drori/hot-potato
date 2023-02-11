@@ -1,6 +1,11 @@
 import { AHEAD_WINDOW, DISCARD_AFTER, INITIAL_WINDOW } from './scripts/constants/constants.js';
 import { ctx, canvas, fitCanvasToWindow } from './scripts/services/canvas.service.js';
-import { keys, captureKeyboardEvents, startOnSpace } from './scripts/services/keyboard.service.js';
+import {
+	keys,
+	captureKeyboardEvents,
+	resetGame,
+	startOnPress
+} from './scripts/services/keyboard.service.js';
 import {
 	init,
 	drawBackground,
@@ -112,7 +117,7 @@ export function start() {
 	generateLavaSurfaces(INITIAL_WINDOW);
 	captureKeyboardEvents();
 	fitCanvasToWindow();
-	removeEventListener('keyup', startOnSpace);
+	removeEventListener('keyup', startOnPress);
 	game.score = 0;
 	scoreEl.innerText = game.score;
 }
@@ -125,7 +130,7 @@ function goToHome() {
 
 document.querySelector('.button.start-now').addEventListener('click', start);
 
-document.querySelector('button.play-again').addEventListener('click', start);
+document.querySelector('button.play-again').addEventListener('click', resetGame);
 
 document.querySelector('button.cancel').addEventListener('click', goToHome);
 
@@ -133,5 +138,5 @@ window.onload = () => {
 	if (document.getElementById('home').style.display === 'none') {
 		return;
 	}
-	addEventListener('keyup', startOnSpace);
+	addEventListener('keyup', startOnPress);
 };
