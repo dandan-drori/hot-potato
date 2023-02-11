@@ -54,12 +54,3 @@ export function isFallingOffRightEdge(entity, platform, entityWidth) {
 		entity.y <= platform.y + platform.height
 	);
 }
-
-export function didHitPlatformEdge() {
-	return (
-		entity.x <= platform.x + platform.width &&
-		entity.x + entity.velocity.x >= platform.x + platform.width &&
-		entity.y + entity.height + 5 >= platform.y &&
-		entity.y <= platform.y + platform.height
-	);
-}
