@@ -1,11 +1,25 @@
-class Enemy extends DimensionImageEntity {
-	constructor(x, y, width, image) {
+import { ctx } from '../services/canvas.service.js';
+import { DimensionImageEntity } from './DimensionImageEntity.js';
+
+export class Enemy extends DimensionImageEntity {
+	constructor(x, y, velocity, image) {
+		super(image);
 		this.x = x;
 		this.y = y;
-		this.image = image;
-		this.width = image.width;
-		this.height = image.height;
+		this.velocity = velocity;
+	}
 
-		super(image, width);
+	draw() {
+		ctx.drawImage(this.image, this.x, this.y);
+	}
+
+	update() {
+		this.draw();
+		this.x += this.velocity.x;
+		this.y += this.velocity.y;
+	}
+
+	setOnDestroy(onDestroy) {
+		this.onDestroy = onDestroy;
 	}
 }

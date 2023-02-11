@@ -5,6 +5,7 @@ import { StartingSurface } from '../entities/StartingSurface.js';
 import { ctx, canvas, removeResizeListener } from './canvas.service.js';
 import { clearEventListeners, keys } from './keyboard.service.js';
 import { getHighscore, saveScore } from './score.service.js';
+import { SpiderEnemy } from '../entities/SpiderEnemy.js';
 
 export let potato;
 export let lavaSurfaces;
@@ -12,7 +13,7 @@ export let game = {
 	latestLandingSurface: null,
 	animationId: null,
 	scrollOffset: 0,
-	score: 0
+	score: 0,
 };
 
 export function init() {
@@ -49,7 +50,15 @@ export function placeLavaSurface() {
 		lavaSurfaces.splice(idx, 1);
 	});
 	lavaSurfaces.push(lava);
-	return lava;
+	if (lava.width > 100 && !getRandomInt(0, 5)) {
+		const spider = new SpiderEnemy(lava.x + 20, lava.y, { x: 0, y: 0 });
+		spider.adjustPositionRelativeToPlatform(lava);
+		spider.setOnDestroy(enemyInstance => {
+			const idx = lava.enemies.indexOf(enemyInstance);
+			lava.enemies.splice(idx, 1);
+		});
+		lava.addEnemy(spider);
+	}
 }
 
 export function gameOverModal() {

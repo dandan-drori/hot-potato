@@ -45,7 +45,10 @@ export class Potato extends DimensionImageEntity {
 		);
 	}
 
-	jump() {
+	jump(isEnemyHit = false) {
+		if (isEnemyHit) {
+			this.jumpCount--;
+		}
 		if (this.jumpCount > MAX_JUMP - 1) {
 			return;
 		}

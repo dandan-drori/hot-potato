@@ -10,6 +10,7 @@ export class Lava extends Platform {
 		super(x, y, velocity, image, decorationImage, width);
 		this.alpha = 1;
 		this.alphaChangeSpeed = 0.05;
+		this.enemies = [];
 	}
 
 	startBlinking(counter = 0) {
@@ -41,5 +42,9 @@ export class Lava extends Platform {
 
 	setOnDestroy(onDestroy) {
 		this.onDestroy = onDestroy;
+	}
+
+	addEnemy(enemy) {
+		this.enemies.push(enemy);
 	}
 }

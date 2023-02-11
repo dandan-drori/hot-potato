@@ -1,4 +1,4 @@
-import {AHEAD_WINDOW, DISCARD_AFTER, INITIAL_WINDOW} from "./scripts/constants/constants.js";
+import { AHEAD_WINDOW, DISCARD_AFTER, INITIAL_WINDOW } from './scripts/constants/constants.js';
 import { ctx, canvas, fitCanvasToWindow } from './scripts/services/canvas.service.js';
 import { keys, captureKeyboardEvents } from './scripts/services/keyboard.service.js';
 import {
@@ -8,26 +8,23 @@ import {
 	lavaSurfaces,
 	generateLavaSurfaces,
 	game,
+	gameOver,
 } from './scripts/services/game.service.js';
+import {
+	isCollided,
+	isCollidedFromLeft,
+	isCollidedFromRight,
+} from './scripts/services/util.service.js';
 
 // Draw the roots (Thorns)
 
 const scoreEl = document.querySelector('.score');
 
-function isCollided(potato, surface) {
-	return (
-		potato.y + potato.height <= surface.y &&
-		potato.y + potato.height + potato.velocity.y >= surface.y &&
-		potato.x + potato.width >= surface.x &&
-		potato.x <= surface.x + surface.width
-	);
-}
-
 function generateNeededPlatforms(lavaSurface) {
 	const indexOfPlatform = lavaSurfaces.indexOf(lavaSurface);
 
-	generateLavaSurfaces(Math.max(AHEAD_WINDOW - (lavaSurfaces.length - 1 - indexOfPlatform), 0))
-	lavaSurfaces.splice(0, Math.max(indexOfPlatform - DISCARD_AFTER, 0))
+	generateLavaSurfaces(Math.max(AHEAD_WINDOW - (lavaSurfaces.length - 1 - indexOfPlatform), 0));
+	lavaSurfaces.splice(0, Math.max(indexOfPlatform - DISCARD_AFTER, 0));
 }
 
 function animate() {
@@ -42,8 +39,19 @@ function animate() {
 		potato.land();
 	}
 	// If player collides with lava surfaces from above, stop falling
-	lavaSurfaces.forEach((lavaSurface) => {
+	lavaSurfaces.forEach(lavaSurface => {
 		lavaSurface.update();
+		// update enemies on the platform
+		lavaSurface.enemies?.forEach(enemy => {
+			enemy.update();
+			if (isCollided(potato, enemy)) {
+				enemy.onDestroy();
+				potato.jump(true);
+				game.score += 1000;
+			} else if (isCollidedFromLeft(potato, enemy) || isCollidedFromRight(potato, enemy)) {
+				gameOver();
+			}
+		});
 		if (isCollided(potato, lavaSurface)) {
 			if (lavaSurface !== game.latestLandingSurface) {
 				lavaSurface?.startBlinking();
@@ -71,8 +79,10 @@ function animate() {
 		lavaSurfaces.forEach(lavaSurface => {
 			if (keys.right.pressed) {
 				lavaSurface.x -= 5;
+				lavaSurface.enemies?.forEach(enemy => (enemy.x -= 5));
 			} else if (keys.left.pressed) {
 				lavaSurface.x += 5;
+				lavaSurface.enemies?.forEach(enemy => (enemy.x += 5));
 			}
 		});
 		potato.velocity.x = 0;
