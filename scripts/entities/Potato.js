@@ -1,16 +1,18 @@
-import { GRAVITY } from '../constants/constants.js';
+import {GRAVITY} from '../constants/constants.js';
 import { ctx } from '../services/canvas.service.js';
-import { gameOver } from '../services/game.service.js';
+import {gameOver, startingSurface} from '../services/game.service.js';
+import {DimensionImageEntity} from "./DimensionImageEntity.js";
 
 const MAX_JUMP = 2;
 
-export class Potato {
-	constructor(x, y, velocity, image) {
+export class Potato extends DimensionImageEntity {
+	constructor(x, y, velocity) {
+		const image = new Image();
+		image.src = '../../assets/images/potato.png';
+		super(image)
+
 		this.x = x;
 		this.y = y;
-		this.image = image;
-		this.width = image.width;
-		this.height = image.height;
 		this.velocity = velocity;
 
 		this.jumpCount = 0;

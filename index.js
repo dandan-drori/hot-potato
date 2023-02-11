@@ -18,6 +18,9 @@ function isCollided(potato, surface) {
 		potato.y + potato.height <= surface.y &&
 		potato.y + potato.height + potato.velocity.y >= surface.y &&
 		potato.x + potato.width >= surface.x &&
+		potato.y + potato.height <= surface.y &&
+		potato.y + potato.height + potato.velocity.y >= surface.y &&
+		potato.x + potato.width >= surface.x &&
 		potato.x <= surface.x + surface.width
 	);
 }
@@ -27,6 +30,13 @@ function animate() {
 	ctx.fillStyle = 'rgba(255,255,255,0.1)';
 	ctx.fillRect(0, 0, canvas.width, canvas.height);
 	drawBackground();
+	startingSurface.update();
+	if (!potato.initialized || !startingSurface.initialized) return;
+
+	// If player collides with starting surface from above, stop falling
+	if (isCollided(potato, startingSurface)) {
+		potato.land();
+	}
 	// If player collides with lava surfaces from above, stop falling
 	lavaSurfaces.forEach(lavaSurface => {
 		lavaSurface.update();
