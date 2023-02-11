@@ -8,13 +8,11 @@ export class Lava extends Platform {
 		const decorationImage = new Image();
 		decorationImage.src = '../../assets/images/lava-surface-loop/spikes.png';
 		super(x, y, velocity, image, decorationImage, width);
-		this.isBlinking = false;
 		this.alpha = 1;
 		this.alphaChangeSpeed = 0.05;
 	}
 
 	startBlinking(counter = 0) {
-		this.isBlinking = true;
 		setTimeout(
 			() => {
 				if (counter >= 6) {

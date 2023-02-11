@@ -1,4 +1,3 @@
-import { ctx } from '../services/canvas.service.js';
 import { drawCropImage } from '../utilities/image_utils.js';
 import { DimensionImageEntity } from './DimensionImageEntity.js';
 
@@ -7,11 +6,8 @@ export class Platform extends DimensionImageEntity {
 		super(image, width);
 		this.x = x;
 		this.y = y;
-		this.image = image;
-		this.width = image.width;
-		this.height = image.height;
-		this.decorationImage = decorationImage;
 		this.velocity = velocity;
+		this.decorationImage = decorationImage;
 	}
 
 	drawPlatform(x, y, width, height) {

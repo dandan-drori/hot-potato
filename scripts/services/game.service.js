@@ -2,7 +2,6 @@ import { getRandomInt } from './util.service.js';
 import { Potato } from '../entities/Potato.js';
 import { Lava } from '../entities/Lava.js';
 import { StartingSurface } from '../entities/StartingSurface.js';
-import { LAVA_SURFACES_OPTIONS } from '../constants/constants.js';
 import { ctx, canvas, removeResizeListener } from './canvas.service.js';
 import { clearEventListeners, keys } from './keyboard.service.js';
 import { getHighscore, saveScore } from './score.service.js';
@@ -10,9 +9,10 @@ import { getHighscore, saveScore } from './score.service.js';
 export let potato;
 export let lavaSurfaces;
 export let game = {
+	latestLandingSurface: null,
 	animationId: null,
 	scrollOffset: 0,
-	score: 0,
+	score: 0
 };
 
 export function init() {
@@ -21,14 +21,13 @@ export function init() {
 	lavaSurfaces = [startingSurface];
 }
 
-export function generateLavaSurfaces() {
-	setInterval(() => {
+export function generateLavaSurfaces(numToGenerate = 1) {
+	for (let i = 0; i < numToGenerate; i++) {
 		placeLavaSurface();
-	}, 1000);
+	}
 }
 
 export function placeLavaSurface() {
-	if (lavaSurfaces.length > 50) return;
 	const lastLavaSurface = lavaSurfaces[lavaSurfaces.length - 1] || {
 		x: 100,
 		y: 500,
@@ -50,6 +49,7 @@ export function placeLavaSurface() {
 		lavaSurfaces.splice(idx, 1);
 	});
 	lavaSurfaces.push(lava);
+	return lava;
 }
 
 export function gameOverModal() {
