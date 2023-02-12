@@ -6,19 +6,24 @@ import { ctx, canvas, removeResizeListener } from './canvas.service.js';
 import { addSpacePressListener, clearEventListeners, keys } from './keyboard.service.js';
 import { getHighscore, saveScore } from './score.service.js';
 import { SpiderEnemy } from '../entities/SpiderEnemy.js';
+import { PLAYER, GAME } from '../constants/constants.js';
 
 export let potato;
 export let lavaSurfaces;
 export let game = {
 	latestLandingSurface: null,
 	animationId: null,
-	scrollOffset: 0,
-	score: 0,
+	scrollOffset: GAME.INITIAL_SCROLL_OFFSET,
+	score: GAME.INITIAL_SCORE,
 };
+export let backgroundImage = new Image();
 
 export function init() {
-	potato = new Potato(100, 0, { x: 0, y: 0 });
-	const startingSurface = new StartingSurface(100, canvas.height / 2, { x: 0, y: 0 });
+	potato = new Potato(PLAYER.INITIAL_X, PLAYER.INITIAL_Y, { x: 0, y: 0 });
+	const startingSurface = new StartingSurface(PLAYER.INITIAL_X, canvas.height / 2, {
+		x: 0,
+		y: 0,
+	});
 	lavaSurfaces = [startingSurface];
 }
 
@@ -65,8 +70,8 @@ export function placeLavaSurface() {
 }
 
 export function gameOverModal() {
-	document.getElementsByClassName('game-over-modal')[0].style.display = 'flex';
-	document.getElementsByTagName('body')[0].style.backgroundColor = 'rgba(0, 0, 0, 0.7)';
+	document.querySelector('.game-over-modal').style.display = 'flex';
+	document.querySelector('body').style.backgroundColor = 'rgba(0, 0, 0, 0.7)';
 	addSpacePressListener();
 }
 
@@ -84,7 +89,9 @@ export function gameOver() {
 }
 
 export function drawBackground() {
-	const img = new Image();
-	img.src = '../../assets/images/background.png';
-	ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+	backgroundImage.onload = function () {
+		backgroundImage = this;
+		ctx.drawImage(backgroundImage, 0, 0, canvas.width, canvas.height);
+	};
+	backgroundImage.src = '../../assets/images/background.png';
 }

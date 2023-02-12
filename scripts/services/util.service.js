@@ -34,7 +34,7 @@ export function isFallingOffTheEdge(entity, platform) {
 }
 
 export function isFallingOffLeftEdge(entity, platform, entityWidth) {
-	const x = entity.x + (entityWidth ?? entity.width)
+	const x = entity.x + (entityWidth ?? entity.width);
 
 	return (
 		x >= platform.x &&

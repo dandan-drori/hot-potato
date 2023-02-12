@@ -1,3 +1,5 @@
+import { GAME } from '../constants/constants.js';
+
 const highscoreKey = 'highscore';
 
 export function saveScore(score) {
@@ -7,5 +9,5 @@ export function saveScore(score) {
 }
 
 export function getHighscore() {
-	return localStorage.getItem(highscoreKey) || 0;
+	return localStorage.getItem(highscoreKey) || GAME.INITIAL_SCORE;
 }

@@ -1,4 +1,4 @@
-import { GRAVITY, AVATARS, MAX_JUMP } from '../constants/constants.js';
+import { POTATO } from '../constants/constants.js';
 import { ctx } from '../services/canvas.service.js';
 import { gameOver } from '../services/game.service.js';
 import { DimensionImageEntity } from './DimensionImageEntity.js';
@@ -26,7 +26,7 @@ export class Potato extends DimensionImageEntity {
 		this.y += this.velocity.y;
 
 		if (this.y + this.height + this.velocity.y <= canvas.height) {
-			this.velocity.y += GRAVITY;
+			this.velocity.y += POTATO.GRAVITY;
 		} else {
 			gameOver();
 		}
@@ -49,13 +49,13 @@ export class Potato extends DimensionImageEntity {
 		if (isEnemyHit) {
 			this.jumpCount--;
 		}
-		if (this.jumpCount > MAX_JUMP - 1) {
+		if (this.jumpCount > POTATO.MAX_JUMP - 1) {
 			return;
 		}
 		this.jumpCount += 1;
 		this.velocity.y = isEnemyHit ? -10 : -15;
 
-		let avatar = AVATARS[this.jumpCount];
+		let avatar = POTATO.AVATARS[this.jumpCount];
 		if (!Array.isArray(avatar)) {
 			avatar = [avatar];
 		}
@@ -65,6 +65,6 @@ export class Potato extends DimensionImageEntity {
 	land() {
 		this.jumpCount = 0;
 		this.velocity.y = 0;
-		this.animateAvatar([AVATARS[this.jumpCount]]);
+		this.animateAvatar([POTATO.AVATARS[this.jumpCount]]);
 	}
 }
