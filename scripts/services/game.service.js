@@ -6,7 +6,7 @@ import { ctx, canvas, removeResizeListener } from './canvas.service.js';
 import { addSpacePressListener, clearEventListeners, keys } from './keyboard.service.js';
 import { getHighscore, saveScore } from './score.service.js';
 import { SpiderEnemy } from '../entities/SpiderEnemy.js';
-import { PLAYER, GAME } from '../constants/constants.js';
+import { PLAYER, GAME, PLATFORM, SPIDER, POTATO } from '../constants/constants.js';
 
 export let potato;
 export let lavaSurfaces;
@@ -19,10 +19,13 @@ export let game = {
 export let backgroundImage = new Image();
 
 export function init() {
-	potato = new Potato(PLAYER.INITIAL_X, PLAYER.INITIAL_Y, { x: 0, y: 0 });
+	potato = new Potato(PLAYER.INITIAL_X, PLAYER.INITIAL_Y, {
+		x: PLAYER.INITIAL_HORIZONTAL_VELOCITY,
+		y: PLAYER.INITIAL_VERTICAL_VELOCITY,
+	});
 	const startingSurface = new StartingSurface(PLAYER.INITIAL_X, canvas.height / 2, {
-		x: 0,
-		y: 0,
+		x: PLATFORM.INITIAL_VELOCITY_X,
+		y: PLATFORM.INITIAL_VELOCITY_X,
 	});
 	lavaSurfaces = [startingSurface];
 }
@@ -34,29 +37,34 @@ export function generateLavaSurfaces(numToGenerate = 1) {
 }
 
 export function placeLavaSurface() {
-	const lastLavaSurface = lavaSurfaces[lavaSurfaces.length - 1] || {
-		x: 100,
-		y: 500,
-		width: 150,
-	};
+	const lastLavaSurface = lavaSurfaces[lavaSurfaces.length - 1];
 	const x = getRandomInt(
-		lastLavaSurface.x + lastLavaSurface.width + 50,
-		lastLavaSurface.x + lastLavaSurface.width + 200
+		lastLavaSurface.x + lastLavaSurface.width + PLATFORM.MIN_X_DISTANCE_BETWEEN_PLATFORMS,
+		lastLavaSurface.x + lastLavaSurface.width + PLATFORM.MAX_X_DISTANCE_BETWEEN_PLATFORMS
 	);
-	if (lastLavaSurface.y + 700 > canvas.height) {
-	}
-	const nextYMax =
-		lastLavaSurface.y + 700 > canvas.height ? lastLavaSurface.y - 200 : lastLavaSurface.y + 600;
-	const nextYMin = lastLavaSurface.y - 500 < 0 ? lastLavaSurface.y + 500 : lastLavaSurface.y - 400;
+	const distanceFromCeil = lastLavaSurface.y;
+	const nextYMin =
+		distanceFromCeil > POTATO.MAX_JUMP_HEIGHT
+			? lastLavaSurface.y - POTATO.MAX_JUMP_HEIGHT + POTATO.HEIGHT
+			: lastLavaSurface.height + POTATO.HEIGHT * 2 + SPIDER.HEIGHT;
+	const nextYMax = canvas.height - lastLavaSurface.height - POTATO.HEIGHT;
 	const y = getRandomInt(nextYMin, nextYMax);
-	const lava = new Lava(x, y, { x: 0, y: 0 }, Math.floor(Math.random() * 300) + 100);
+	const lava = new Lava(
+		x,
+		y,
+		{ x: PLATFORM.INITIAL_VELOCITY_X, y: PLATFORM.INITIAL_VELOCITY_Y },
+		Math.floor(Math.random() * (PLATFORM.MAX_WIDTH - PLATFORM.MIN_WIDTH)) + PLATFORM.MIN_WIDTH
+	);
 	lava.setOnDestroy(lavaInstance => {
 		const idx = lavaSurfaces.indexOf(lavaInstance);
 		lavaSurfaces.splice(idx, 1);
 	});
 	lavaSurfaces.push(lava);
-	if (lava.width > 100 && !getRandomInt(0, 5)) {
-		const spider = new SpiderEnemy(lava.x + 20, lava.y, { x: 0, y: 0 });
+	if (shouldGenerateSpider(lava, lava.height + POTATO.HEIGHT + SPIDER.HEIGHT + 100)) {
+		const spider = new SpiderEnemy(lava.x, lava.y, {
+			x: SPIDER.INITIAL_VELOCITY_X,
+			y: SPIDER.INITIAL_VELOCITY_Y,
+		});
 		spider.onImageLoad = () => {
 			spider.adjustPositionRelativeToPlatform(lava);
 		};
@@ -94,4 +102,11 @@ export function drawBackground() {
 		ctx.drawImage(backgroundImage, 0, 0, canvas.width, canvas.height);
 	};
 	backgroundImage.src = '../../assets/images/background.png';
+}
+
+function shouldGenerateSpider(lava, miniumHeight = 0) {
+	const isPlatformWideEnoughForSpider = lava.width > SPIDER.WIDTH;
+	const chanceToGenerate = !getRandomInt(0, 5);
+	const platformIsFarEnoughFromCeiling = lava.y > miniumHeight;
+	return isPlatformWideEnoughForSpider && chanceToGenerate && platformIsFarEnoughFromCeiling;
 }

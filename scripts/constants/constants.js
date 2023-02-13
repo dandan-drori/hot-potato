@@ -6,6 +6,8 @@ export const POTATO = {
 		['../../assets/images/smushed.png', '../../assets/images/jumping.png'],
 		'../../assets/images/double jump.png',
 	],
+	MAX_JUMP_HEIGHT: 400,
+	HEIGHT: 57,
 };
 
 export const CANVAS = {
@@ -31,4 +33,20 @@ export const PLAYER = {
 	HORIZONTAL_VELOCITY: 5,
 	INITIAL_X: 100,
 	INITIAL_Y: 0,
+};
+
+export const PLATFORM = {
+	INITIAL_VELOCITY_X: 0,
+	INITIAL_VELOCITY_Y: 0,
+	MIN_X_DISTANCE_BETWEEN_PLATFORMS: 50,
+	MAX_X_DISTANCE_BETWEEN_PLATFORMS: 250,
+	MIN_WIDTH: 100,
+	MAX_WIDTH: 400,
+};
+
+export const SPIDER = {
+	HEIGHT: 72,
+	WIDTH: 122,
+	INITIAL_VELOCITY_X: 0,
+	INITIAL_VELOCITY_Y: 0,
 };

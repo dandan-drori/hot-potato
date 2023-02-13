@@ -1,4 +1,4 @@
-import { GAME, PLAYER, CANVAS, POTATO } from './scripts/constants/constants.js';
+import { GAME, PLAYER, CANVAS } from './scripts/constants/constants.js';
 import { ctx, canvas, fitCanvasToWindow } from './scripts/services/canvas.service.js';
 import {
 	keys,
@@ -80,9 +80,8 @@ function animate() {
 	} else {
 		if (keys.right.pressed) {
 			game.score += GAME.SCROLL_OFFSET_POINTS;
-		} else if (keys.left.pressed) {
 		}
-		if (game.score >= 0) {
+		if (game.score >= GAME.INITIAL_SCORE) {
 			scoreEl.innerText = game.score;
 		}
 		lavaSurfaces.forEach(lavaSurface => {
