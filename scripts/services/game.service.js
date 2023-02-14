@@ -2,21 +2,23 @@ import { getRandomInt } from './util.service.js';
 import { Potato } from '../entities/Potato.js';
 import { Lava } from '../entities/Lava.js';
 import { StartingSurface } from '../entities/StartingSurface.js';
+import { Particle } from '../entities/Particle.js';
+import { SpiderEnemy } from '../entities/SpiderEnemy.js';
 import { ctx, canvas, removeResizeListener } from './canvas.service.js';
 import { addSpacePressListener, clearEventListeners, keys } from './keyboard.service.js';
 import { getHighscore, saveScore } from './score.service.js';
-import { SpiderEnemy } from '../entities/SpiderEnemy.js';
 import { PLAYER, GAME, PLATFORM, SPIDER, POTATO } from '../constants/constants.js';
 
 export let potato;
 export let lavaSurfaces;
-export let game = {
+export let particles;
+export const game = {
 	latestLandingSurface: null,
 	animationId: null,
 	scrollOffset: GAME.INITIAL_SCROLL_OFFSET,
 	score: GAME.INITIAL_SCORE,
 };
-export let backgroundImage = new Image();
+let backgroundImage = new Image();
 
 export function init() {
 	potato = new Potato(PLAYER.INITIAL_X, PLAYER.INITIAL_Y, {
@@ -28,6 +30,7 @@ export function init() {
 		y: PLATFORM.INITIAL_VELOCITY_X,
 	});
 	lavaSurfaces = [startingSurface];
+	particles = [];
 }
 
 export function generateLavaSurfaces(numToGenerate = 1) {
@@ -38,9 +41,10 @@ export function generateLavaSurfaces(numToGenerate = 1) {
 
 export function placeLavaSurface() {
 	const lastLavaSurface = lavaSurfaces[lavaSurfaces.length - 1];
+	const lastLavaSurfaceWidth = lastLavaSurface.width || PLATFORM.DEFAULT_WIDTH;
 	const x = getRandomInt(
-		lastLavaSurface.x + lastLavaSurface.width + PLATFORM.MIN_X_DISTANCE_BETWEEN_PLATFORMS,
-		lastLavaSurface.x + lastLavaSurface.width + PLATFORM.MAX_X_DISTANCE_BETWEEN_PLATFORMS
+		lastLavaSurface.x + lastLavaSurfaceWidth + PLATFORM.MIN_X_DISTANCE_BETWEEN_PLATFORMS,
+		lastLavaSurface.x + lastLavaSurfaceWidth + PLATFORM.MAX_X_DISTANCE_BETWEEN_PLATFORMS
 	);
 	const distanceFromCeil = lastLavaSurface.y;
 	const nextYMin =
@@ -58,6 +62,9 @@ export function placeLavaSurface() {
 	lava.setOnDestroy(lavaInstance => {
 		const idx = lavaSurfaces.indexOf(lavaInstance);
 		lavaSurfaces.splice(idx, 1);
+		increaseScoreBy(GAME.PLATFORM_DESTROY_POINTS);
+		addParticles(lavaInstance);
+		lavaInstance.enemies.forEach(enemy => enemy?.onDestroy());
 	});
 	lavaSurfaces.push(lava);
 	if (shouldGenerateSpider(lava, lava.height + POTATO.HEIGHT + SPIDER.HEIGHT + 100)) {
@@ -71,6 +78,7 @@ export function placeLavaSurface() {
 		spider.setOnDestroy(enemyInstance => {
 			const idx = lava.enemies.indexOf(enemyInstance);
 			lava.enemies.splice(idx, 1);
+			addParticles(spider);
 		});
 		spider.patrolPlatform(lava);
 		lava.addEnemy(spider);
@@ -109,4 +117,27 @@ function shouldGenerateSpider(lava, miniumHeight = 0) {
 	const chanceToGenerate = !getRandomInt(0, 5);
 	const platformIsFarEnoughFromCeiling = lava.y > miniumHeight;
 	return isPlatformWideEnoughForSpider && chanceToGenerate && platformIsFarEnoughFromCeiling;
+}
+
+export function increaseScoreBy(amount) {
+	game.score += amount;
+}
+
+export function resetScore() {
+	game.score = GAME.INITIAL_SCORE;
+}
+
+export function addParticles(destroyedEntity) {
+	const color = destroyedEntity instanceof Lava ? '#ffbb00' : '#050505';
+	const horizontalMiddle = destroyedEntity.x + destroyedEntity.width / 2;
+	const verticalMiddle = destroyedEntity.y + destroyedEntity.height / 2;
+	const radius = Math.random() * 2;
+	for (let i = 0; i < destroyedEntity.width * 2; i++) {
+		particles.push(
+			new Particle(horizontalMiddle, verticalMiddle, radius, color, {
+				x: (Math.random() - 0.5) * (Math.random() * 6),
+				y: Math.random() - 0.5 * (Math.random() * 6),
+			})
+		);
+	}
 }

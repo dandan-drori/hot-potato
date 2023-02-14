@@ -1,4 +1,4 @@
-import { POTATO } from '../constants/constants.js';
+import { PLAYER, POTATO } from '../constants/constants.js';
 import { ctx } from '../services/canvas.service.js';
 import { gameOver } from '../services/game.service.js';
 import { DimensionImageEntity } from './DimensionImageEntity.js';
@@ -13,7 +13,7 @@ export class Potato extends DimensionImageEntity {
 		this.y = y;
 		this.velocity = velocity;
 
-		this.jumpCount = 0;
+		this.jumpCount = POTATO.INITIAL_JUMP_COUNT;
 	}
 
 	draw() {
@@ -49,22 +49,20 @@ export class Potato extends DimensionImageEntity {
 		if (isEnemyHit) {
 			this.jumpCount--;
 		}
-		if (this.jumpCount > POTATO.MAX_JUMP - 1) {
+		if (this.jumpCount >= POTATO.MAX_JUMP) {
 			return;
 		}
-		this.jumpCount += 1;
-		this.velocity.y = isEnemyHit ? -10 : -15;
+		this.jumpCount++;
+		this.velocity.y = isEnemyHit ? POTATO.BOUNCE_SPEED_AFTER_HITTING_ENEMY : POTATO.JUMP_SPEED;
 
-		let avatar = POTATO.AVATARS[this.jumpCount];
-		if (!Array.isArray(avatar)) {
-			avatar = [avatar];
-		}
-		this.animateAvatar(avatar);
+		const avatar = POTATO.AVATARS[this.jumpCount];
+		const avatarArray = !Array.isArray(avatar) ? [avatar] : avatar;
+		this.animateAvatar(avatarArray);
 	}
 
 	land() {
-		this.jumpCount = 0;
-		this.velocity.y = 0;
+		this.jumpCount = POTATO.INITIAL_JUMP_COUNT;
+		this.velocity.y = PLAYER.INITIAL_VERTICAL_VELOCITY;
 		this.animateAvatar([POTATO.AVATARS[this.jumpCount]]);
 	}
 }

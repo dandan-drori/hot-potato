@@ -11,18 +11,18 @@ import {
 	drawBackground,
 	potato,
 	lavaSurfaces,
+	particles,
 	generateLavaSurfaces,
 	game,
 	gameOver,
+	increaseScoreBy,
+	resetScore,
 } from './scripts/services/game.service.js';
 import {
 	isCollided,
 	isCollidedFromLeft,
 	isCollidedFromRight,
-	isFallingOffTheEdge,
 } from './scripts/services/util.service.js';
-
-// Draw the roots (Thorns)
 
 const scoreEl = document.querySelector('.score');
 
@@ -43,6 +43,16 @@ function animate() {
 	const startingSurface = lavaSurfaces[0];
 	if (!potato.initialized || !startingSurface.initialized) return;
 
+	// loop over particles
+	particles.forEach((particle, index) => {
+		// if particle should be removed, remove it, else, keep updating it
+		if (particle.alpha <= 0) {
+			particles.splice(index, 1);
+		} else {
+			particle.update();
+		}
+	});
+
 	// If player collides with starting surface from above, stop falling
 	if (isCollided(potato, startingSurface)) {
 		potato.land();
@@ -56,7 +66,7 @@ function animate() {
 			if (isCollided(potato, enemy)) {
 				enemy.onDestroy();
 				potato.jump(true);
-				game.score += GAME.ENEMY_KILL_POINTS;
+				increaseScoreBy(GAME.ENEMY_KILL_POINTS);
 			} else if (isCollidedFromLeft(potato, enemy) || isCollidedFromRight(potato, enemy)) {
 				gameOver();
 			}
@@ -79,8 +89,12 @@ function animate() {
 		potato.velocity.x = -PLAYER.HORIZONTAL_VELOCITY;
 	} else {
 		if (keys.right.pressed) {
-			game.score += GAME.SCROLL_OFFSET_POINTS;
+			increaseScoreBy(GAME.SCROLL_OFFSET_POINTS);
+			particles.forEach(particle => (particle.x -= GAME.SCROLL_BACKGROUND_HORIZONTAL_SPEED));
+		} else if (keys.left.pressed) {
+			particles.forEach(particle => (particle.x += GAME.SCROLL_BACKGROUND_HORIZONTAL_SPEED));
 		}
+
 		if (game.score >= GAME.INITIAL_SCORE) {
 			scoreEl.innerText = game.score;
 		}
@@ -114,7 +128,7 @@ export function start() {
 	captureKeyboardEvents();
 	fitCanvasToWindow();
 	removeEventListener('keyup', startOnPress);
-	game.score = GAME.INITIAL_SCORE;
+	resetScore();
 	scoreEl.innerText = game.score;
 }
 
