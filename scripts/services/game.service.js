@@ -10,11 +10,13 @@ import { getHighscore, saveScore } from './score.service.js';
 import { PLAYER, GAME, PLATFORM, SPIDER, POTATO } from '../constants/constants.js';
 import { AudioService } from './audio.service.js';
 import { Roots } from '../entities/Roots.js';
+import { KillerRoot } from '../entities/KillerRoot.js';
 
 export let potato;
 export let lavaSurfaces;
 export let particles;
 export let roots;
+export let killerRoots;
 export const game = {
 	latestLandingSurface: null,
 	animationId: null,
@@ -35,6 +37,7 @@ export function init() {
 	lavaSurfaces = [startingSurface];
 	particles = [];
 	roots = [];
+	killerRoots = [];
 }
 
 export function generateLavaSurfaces(numToGenerate = 1) {
@@ -183,4 +186,21 @@ export function placeRoots() {
 	}
 
 	roots.push(newRoots);
+}
+
+export function generateKillerRoots() {
+	setInterval(() => {
+		const lastLavaSurfaceIndex = lavaSurfaces.indexOf(game.latestLandingSurface);
+		const nextLavaSurface = lavaSurfaces[lastLavaSurfaceIndex + 2];
+		const afterNextLavaSurface = lavaSurfaces[lastLavaSurfaceIndex + 3];
+		const diff = afterNextLavaSurface.x + nextLavaSurface.x + nextLavaSurface.width;
+		const middle = Math.floor(diff / 2);
+		const x = middle - 21;
+		summonKillerRoot(x);
+	}, 10 * 1000);
+}
+
+export function summonKillerRoot(x) {
+	const killerRoot = new KillerRoot(x, canvas.height, { x: 0, y: -5 });
+	killerRoots.push(killerRoot);
 }

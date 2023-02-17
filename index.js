@@ -21,6 +21,8 @@ import {
 	increaseScoreBy,
 	resetScore,
 	playBackgroundMusic,
+	killerRoots,
+	generateKillerRoots,
 } from './scripts/services/game.service.js';
 import {
 	isCollided,
@@ -44,6 +46,16 @@ function animate() {
 		root.draw();
 	});
 
+	// loop over killerRoots
+	killerRoots.forEach(killerRoot => {
+		killerRoot.update();
+		if (keys.right.pressed && potato.x >= PLAYER.RIGHT_BORDER) {
+			killerRoot.x -= GAME.SCROLL_BACKGROUND_HORIZONTAL_SPEED;
+		} else if (keys.left.pressed && potato.x <= PLAYER.LEFT_BORDER) {
+			killerRoot.x += GAME.SCROLL_BACKGROUND_HORIZONTAL_SPEED;
+		}
+	});
+
 	// loop over particles
 	particles.forEach((particle, index) => {
 		// if particle should be removed, remove it, else, keep updating it
@@ -51,6 +63,11 @@ function animate() {
 			particles.splice(index, 1);
 		} else {
 			particle.update();
+			if (keys.right.pressed && potato.x >= PLAYER.RIGHT_BORDER) {
+				particle.x -= GAME.SCROLL_BACKGROUND_HORIZONTAL_SPEED;
+			} else if (keys.left.pressed && potato.x <= PLAYER.LEFT_BORDER) {
+				particle.x += GAME.SCROLL_BACKGROUND_HORIZONTAL_SPEED;
+			}
 		}
 	});
 
@@ -58,12 +75,26 @@ function animate() {
 	if (isCollided(potato, startingSurface)) {
 		potato.land();
 	}
-	// If player collides with lava surfaces from above, stop falling
+
+	// loop over lava surfaces
 	lavaSurfaces.forEach(lavaSurface => {
 		lavaSurface.update();
+
+		if (keys.right.pressed && potato.x >= PLAYER.RIGHT_BORDER) {
+			lavaSurface.x -= GAME.SCROLL_BACKGROUND_HORIZONTAL_SPEED;
+		} else if (keys.left.pressed && potato.x <= PLAYER.LEFT_BORDER) {
+			lavaSurface.x += GAME.SCROLL_BACKGROUND_HORIZONTAL_SPEED;
+		}
+
 		// update enemies on the platform
 		lavaSurface.enemies?.forEach(enemy => {
 			enemy.update();
+
+			if (keys.right.pressed && potato.x >= PLAYER.RIGHT_BORDER) {
+				enemy.x -= GAME.SCROLL_BACKGROUND_HORIZONTAL_SPEED;
+			} else if (keys.left.pressed && potato.x <= PLAYER.LEFT_BORDER) {
+				enemy.x += GAME.SCROLL_BACKGROUND_HORIZONTAL_SPEED;
+			}
 
 			// if spider has fallen, stop rendering it
 			if (enemy.y > canvas.height) {
@@ -79,6 +110,8 @@ function animate() {
 				gameOver();
 			}
 		});
+
+		// If player collides with lava surfaces from above, stop falling
 		if (isCollided(potato, lavaSurface)) {
 			if (lavaSurface !== game.latestLandingSurface) {
 				lavaSurface?.startBlinking();
@@ -98,23 +131,11 @@ function animate() {
 	} else {
 		if (keys.right.pressed) {
 			increaseScoreBy(GAME.SCROLL_OFFSET_POINTS);
-			particles.forEach(particle => (particle.x -= GAME.SCROLL_BACKGROUND_HORIZONTAL_SPEED));
-		} else if (keys.left.pressed) {
-			particles.forEach(particle => (particle.x += GAME.SCROLL_BACKGROUND_HORIZONTAL_SPEED));
 		}
 
 		if (game.score >= GAME.INITIAL_SCORE) {
 			scoreEl.innerText = game.score;
 		}
-		lavaSurfaces.forEach(lavaSurface => {
-			if (keys.right.pressed) {
-				lavaSurface.x -= GAME.SCROLL_BACKGROUND_HORIZONTAL_SPEED;
-				lavaSurface.enemies?.forEach(enemy => (enemy.x -= GAME.SCROLL_BACKGROUND_HORIZONTAL_SPEED));
-			} else if (keys.left.pressed) {
-				lavaSurface.x += GAME.SCROLL_BACKGROUND_HORIZONTAL_SPEED;
-				lavaSurface.enemies?.forEach(enemy => (enemy.x += GAME.SCROLL_BACKGROUND_HORIZONTAL_SPEED));
-			}
-		});
 		potato.velocity.x = PLAYER.INITIAL_HORIZONTAL_VELOCITY;
 	}
 
@@ -133,6 +154,7 @@ export function start() {
 	init();
 	requestAnimationFrame(animate);
 	generateLavaSurfaces(GAME.INITIAL_WINDOW);
+	generateKillerRoots();
 	captureKeyboardEvents();
 	fitCanvasToWindow();
 	removeEventListener('keyup', startOnPress);
