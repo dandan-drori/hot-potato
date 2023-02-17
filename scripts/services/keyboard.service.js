@@ -52,7 +52,7 @@ export function resetGame() {
 
 export function startOnPress({ key }) {
 	if (key === ' ') {
-		resetGame()
+		resetGame();
 	}
 }
 

@@ -10,13 +10,17 @@ import {
 	init,
 	drawBackground,
 	potato,
+	roots,
 	lavaSurfaces,
 	particles,
 	generateLavaSurfaces,
+	generateNeededPlatforms,
+	generateNeededRoots,
 	game,
 	gameOver,
 	increaseScoreBy,
 	resetScore,
+	playBackgroundMusic,
 } from './scripts/services/game.service.js';
 import {
 	isCollided,
@@ -26,22 +30,19 @@ import {
 
 const scoreEl = document.querySelector('.score');
 
-function generateNeededPlatforms(lavaSurface) {
-	const indexOfPlatform = lavaSurfaces.indexOf(lavaSurface);
-
-	generateLavaSurfaces(
-		Math.max(GAME.AHEAD_WINDOW - (lavaSurfaces.length - 1 - indexOfPlatform), 0)
-	);
-	lavaSurfaces.splice(0, Math.max(indexOfPlatform - GAME.DISCARD_AFTER, 0));
-}
-
 function animate() {
 	game.animationId = requestAnimationFrame(animate);
 	ctx.fillStyle = CANVAS.FILL_STYLE;
 	ctx.fillRect(0, 0, canvas.width, canvas.height);
 	drawBackground();
+	generateNeededRoots();
 	const startingSurface = lavaSurfaces[0];
 	if (!potato.initialized || !startingSurface.initialized) return;
+
+	// loop over roots
+	roots.forEach(root => {
+		root.draw();
+	});
 
 	// loop over particles
 	particles.forEach((particle, index) => {
@@ -63,8 +64,15 @@ function animate() {
 		// update enemies on the platform
 		lavaSurface.enemies?.forEach(enemy => {
 			enemy.update();
+
+			// if spider has fallen, stop rendering it
+			if (enemy.y > canvas.height) {
+				const idx = lavaSurface.enemies.indexOf(enemy);
+				lavaSurface.enemies.splice(idx, 1);
+			}
+
 			if (isCollided(potato, enemy)) {
-				enemy.onDestroy();
+				enemy.onDestroy(enemy);
 				potato.jump(true);
 				increaseScoreBy(GAME.ENEMY_KILL_POINTS);
 			} else if (isCollidedFromLeft(potato, enemy) || isCollidedFromRight(potato, enemy)) {
@@ -74,7 +82,7 @@ function animate() {
 		if (isCollided(potato, lavaSurface)) {
 			if (lavaSurface !== game.latestLandingSurface) {
 				lavaSurface?.startBlinking();
-				generateNeededPlatforms();
+				generateNeededPlatforms(lavaSurface);
 			}
 
 			potato.land();
@@ -129,6 +137,7 @@ export function start() {
 	fitCanvasToWindow();
 	removeEventListener('keyup', startOnPress);
 	resetScore();
+	playBackgroundMusic();
 	scoreEl.innerText = game.score;
 }
 

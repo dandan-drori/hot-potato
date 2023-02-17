@@ -2,6 +2,7 @@ import { PLAYER, POTATO } from '../constants/constants.js';
 import { ctx } from '../services/canvas.service.js';
 import { gameOver } from '../services/game.service.js';
 import { DimensionImageEntity } from './DimensionImageEntity.js';
+import { AudioService } from '../services/audio.service.js';
 
 export class Potato extends DimensionImageEntity {
 	constructor(x, y, velocity) {
@@ -33,12 +34,15 @@ export class Potato extends DimensionImageEntity {
 	}
 
 	animateAvatar(avatar, counter = 0) {
+		// keep jumpCount in a closure
+		const currJumpCount = this.jumpCount;
 		setTimeout(
 			() => {
+				// only change to jump avatar if not in super jump
+				if (currJumpCount !== this.jumpCount) return;
 				this.image.src = avatar[counter];
-				if (counter >= avatar.length - 1) {
-					return;
-				}
+				// don't change avatars if there are not more avatars to change to
+				if (counter >= avatar.length - 1) return;
 				this.animateAvatar(avatar, counter + 1);
 			},
 			counter ? 200 : 0
@@ -46,6 +50,7 @@ export class Potato extends DimensionImageEntity {
 	}
 
 	jump(isEnemyHit = false) {
+		AudioService.getInstance().stopAllJumpSounds();
 		if (isEnemyHit) {
 			this.jumpCount--;
 		}
@@ -58,6 +63,7 @@ export class Potato extends DimensionImageEntity {
 		const avatar = POTATO.AVATARS[this.jumpCount];
 		const avatarArray = !Array.isArray(avatar) ? [avatar] : avatar;
 		this.animateAvatar(avatarArray);
+		AudioService.getInstance().playSound('jump');
 	}
 
 	land() {

@@ -8,10 +8,13 @@ import { ctx, canvas, removeResizeListener } from './canvas.service.js';
 import { addSpacePressListener, clearEventListeners, keys } from './keyboard.service.js';
 import { getHighscore, saveScore } from './score.service.js';
 import { PLAYER, GAME, PLATFORM, SPIDER, POTATO } from '../constants/constants.js';
+import { AudioService } from './audio.service.js';
+import { Roots } from '../entities/Roots.js';
 
 export let potato;
 export let lavaSurfaces;
 export let particles;
+export let roots;
 export const game = {
 	latestLandingSurface: null,
 	animationId: null,
@@ -31,6 +34,7 @@ export function init() {
 	});
 	lavaSurfaces = [startingSurface];
 	particles = [];
+	roots = [];
 }
 
 export function generateLavaSurfaces(numToGenerate = 1) {
@@ -64,7 +68,7 @@ export function placeLavaSurface() {
 		lavaSurfaces.splice(idx, 1);
 		increaseScoreBy(GAME.PLATFORM_DESTROY_POINTS);
 		addParticles(lavaInstance);
-		lavaInstance.enemies.forEach(enemy => enemy?.onDestroy());
+		lavaInstance.enemies.forEach(enemy => enemy?.onDestroy(enemy));
 	});
 	lavaSurfaces.push(lava);
 	if (shouldGenerateSpider(lava, lava.height + POTATO.HEIGHT + SPIDER.HEIGHT + 100)) {
@@ -76,9 +80,9 @@ export function placeLavaSurface() {
 			spider.adjustPositionRelativeToPlatform(lava);
 		};
 		spider.setOnDestroy(enemyInstance => {
-			const idx = lava.enemies.indexOf(enemyInstance);
-			lava.enemies.splice(idx, 1);
-			addParticles(spider);
+			// const idx = lava.enemies.indexOf(enemyInstance);
+			// lava.enemies.splice(idx, 1);
+			enemyInstance.fall();
 		});
 		spider.patrolPlatform(lava);
 		lava.addEnemy(spider);
@@ -97,6 +101,7 @@ export function gameOver() {
 	removeResizeListener();
 	clearEventListeners();
 	saveScore(game.score);
+	AudioService.getInstance().stopAllSounds();
 	document.querySelector('.highscore').innerText = getHighscore();
 	// fixes bug where after clicking "play again", if one of the arrows was still pressed upon death,
 	// the potato starts moving without pressing any key
@@ -140,4 +145,42 @@ export function addParticles(destroyedEntity) {
 			})
 		);
 	}
+}
+
+export function playBackgroundMusic() {
+	AudioService.getInstance().playSound('background');
+}
+
+export function generateNeededPlatforms(lavaSurface) {
+	const indexOfPlatform = lavaSurfaces.indexOf(lavaSurface);
+
+	generateLavaSurfaces(
+		Math.max(GAME.AHEAD_WINDOW - (lavaSurfaces.length - 1 - indexOfPlatform), 0)
+	);
+	lavaSurfaces.splice(0, Math.max(indexOfPlatform - GAME.DISCARD_AFTER, 0));
+}
+
+export function generateNeededRoots() {
+	const combinedRootsWidth = roots.reduce((combinedWidth, currRoot) => {
+		return combinedWidth + currRoot.width;
+	}, 0);
+
+	// if roots fill the entire screen width, stop generating more roots
+	if (combinedRootsWidth >= canvas.width) return;
+
+	placeRoots();
+}
+
+export function placeRoots() {
+	const lastRoots = roots[roots.length - 1] || { x: 0, y: canvas.height - 540, width: 0 };
+	const newRoots = new Roots(lastRoots.x + lastRoots.width, lastRoots.y);
+
+	// fixes bug where roots didn't fill the entire screen width
+	if (roots.length) {
+		newRoots.onImageLoad = () => {
+			newRoots.adjustPositionRelativeToLastRoots(lastRoots);
+		};
+	}
+
+	roots.push(newRoots);
 }
