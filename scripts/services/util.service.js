@@ -29,6 +29,24 @@ export function isCollidedFromRight(potato, enemy) {
 	);
 }
 
+export function isCollidedFromBottom(potato, entity) {
+	return (
+		potato.y + potato.height >= entity.y &&
+		potato.y + potato.height + potato.velocity.y <= entity.y &&
+		potato.x + potato.width >= entity.x &&
+		potato.x <= entity.x + entity.width
+	);
+}
+
+export function isCollidedFromAnyDirection(potato, entity) {
+	return (
+		isCollided(potato, entity) ||
+		isCollidedFromLeft(potato, entity) ||
+		isCollidedFromRight(potato, entity) ||
+		isCollidedFromBottom(potato, entity)
+	);
+}
+
 export function isFallingOffTheEdge(entity, platform) {
 	return isFallingOffRightEdge(entity, platform) || isFallingOffLeftEdge(entity, platform);
 }
@@ -37,10 +55,7 @@ export function isFallingOffLeftEdge(entity, platform, entityWidth) {
 	const x = entity.x + (entityWidth ?? entity.width);
 
 	return (
-		x >= platform.x &&
-		x + entity.velocity.x <= platform.x &&
-		entity.y + entity.height <= platform.y &&
-		entity.y + entity.height + entity.velocity.y >= platform.y
+		x >= platform.x && x + entity.velocity.x <= platform.x && entity.y + entity.height <= platform.y
 	);
 }
 

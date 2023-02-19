@@ -1,6 +1,6 @@
 import { PLAYER, POTATO } from '../constants/constants.js';
 import { ctx } from '../services/canvas.service.js';
-import { gameOver } from '../services/game.service.js';
+import { gameOver, potatoHasPowerUp } from '../services/game.service.js';
 import { DimensionImageEntity } from './DimensionImageEntity.js';
 import { AudioService } from '../services/audio.service.js';
 
@@ -15,6 +15,7 @@ export class Potato extends DimensionImageEntity {
 		this.velocity = velocity;
 
 		this.jumpCount = POTATO.INITIAL_JUMP_COUNT;
+		this.activePowerUps = [];
 	}
 
 	draw() {
@@ -50,11 +51,14 @@ export class Potato extends DimensionImageEntity {
 	}
 
 	jump(isEnemyHit = false) {
+		const maxJump = potatoHasPowerUp('triple-jump')
+			? POTATO.MAX_JUMP_WITH_POWER_UP
+			: POTATO.MAX_JUMP;
 		AudioService.getInstance().stopAllJumpSounds();
 		if (isEnemyHit) {
 			this.jumpCount--;
 		}
-		if (this.jumpCount >= POTATO.MAX_JUMP) {
+		if (this.jumpCount >= maxJump) {
 			return;
 		}
 		this.jumpCount++;
@@ -70,5 +74,20 @@ export class Potato extends DimensionImageEntity {
 		this.jumpCount = POTATO.INITIAL_JUMP_COUNT;
 		this.velocity.y = PLAYER.INITIAL_VERTICAL_VELOCITY;
 		this.animateAvatar([POTATO.AVATARS[this.jumpCount]]);
+	}
+
+	addPowerUp(powerUp) {
+		this.removeTypePowerUps(powerUp.type);
+		this.activePowerUps.push(powerUp);
+		setTimeout(() => {
+			const idx = this.activePowerUps.findIndex(
+				activePowerUp => activePowerUp.type === powerUp.type
+			);
+			this.activePowerUps.splice(idx, 1);
+		}, 10 * 1000);
+	}
+
+	removeTypePowerUps(type) {
+		this.activePowerUps.filter(powerUp => powerUp.type !== type);
 	}
 }

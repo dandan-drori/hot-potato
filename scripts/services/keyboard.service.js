@@ -1,5 +1,5 @@
 import { start } from '../../index.js';
-import { potato } from './game.service.js';
+import { GameManager } from './game-manager.service.js';
 
 export const keys = {
 	left: {
@@ -19,7 +19,7 @@ function onKeyDown({ key }) {
 			keys.right.pressed = true;
 			break;
 		case ' ':
-			potato.jump();
+			GameManager.getInstance().potato.jump();
 			break;
 	}
 }

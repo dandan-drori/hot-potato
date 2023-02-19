@@ -11,6 +11,7 @@ export class Lava extends Platform {
 		this.alpha = 1;
 		this.alphaChangeSpeed = 0.05;
 		this.enemies = [];
+		this.powerUps = [];
 	}
 
 	startBlinking(counter = 0) {
@@ -46,5 +47,9 @@ export class Lava extends Platform {
 
 	addEnemy(enemy) {
 		this.enemies.push(enemy);
+	}
+
+	addPowerUp(powerUp) {
+		this.powerUps.push(powerUp);
 	}
 }

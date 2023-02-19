@@ -7,26 +7,26 @@ import { SpiderEnemy } from '../entities/SpiderEnemy.js';
 import { ctx, canvas, removeResizeListener } from './canvas.service.js';
 import { addSpacePressListener, clearEventListeners, keys } from './keyboard.service.js';
 import { getHighscore, saveScore } from './score.service.js';
-import { PLAYER, GAME, PLATFORM, SPIDER, POTATO } from '../constants/constants.js';
+import {
+	PLAYER,
+	GAME,
+	PLATFORM,
+	SPIDER,
+	POTATO,
+	POWER_UP,
+	KILLER_ROOT,
+} from '../constants/constants.js';
 import { AudioService } from './audio.service.js';
 import { Roots } from '../entities/Roots.js';
 import { KillerRoot } from '../entities/KillerRoot.js';
+import { GameManager } from '../services/game-manager.service.js';
+import { PowerUp } from '../entities/PowerUp.js';
 
-export let potato;
-export let lavaSurfaces;
-export let particles;
-export let roots;
-export let killerRoots;
-export const game = {
-	latestLandingSurface: null,
-	animationId: null,
-	scrollOffset: GAME.INITIAL_SCROLL_OFFSET,
-	score: GAME.INITIAL_SCORE,
-};
 let backgroundImage = new Image();
 
 export function init() {
-	potato = new Potato(PLAYER.INITIAL_X, PLAYER.INITIAL_Y, {
+	const game = GameManager.getInstance();
+	game.potato = new Potato(PLAYER.INITIAL_X, PLAYER.INITIAL_Y, {
 		x: PLAYER.INITIAL_HORIZONTAL_VELOCITY,
 		y: PLAYER.INITIAL_VERTICAL_VELOCITY,
 	});
@@ -34,10 +34,10 @@ export function init() {
 		x: PLATFORM.INITIAL_VELOCITY_X,
 		y: PLATFORM.INITIAL_VELOCITY_X,
 	});
-	lavaSurfaces = [startingSurface];
-	particles = [];
-	roots = [];
-	killerRoots = [];
+	game.lavaSurfaces = [startingSurface];
+	game.particles = [];
+	game.roots = [];
+	game.killerRoots = [];
 }
 
 export function generateLavaSurfaces(numToGenerate = 1) {
@@ -47,7 +47,8 @@ export function generateLavaSurfaces(numToGenerate = 1) {
 }
 
 export function placeLavaSurface() {
-	const lastLavaSurface = lavaSurfaces[lavaSurfaces.length - 1];
+	const game = GameManager.getInstance();
+	const lastLavaSurface = game.lavaSurfaces[game.lavaSurfaces.length - 1];
 	const lastLavaSurfaceWidth = lastLavaSurface.width || PLATFORM.DEFAULT_WIDTH;
 	const x = getRandomInt(
 		lastLavaSurface.x + lastLavaSurfaceWidth + PLATFORM.MIN_X_DISTANCE_BETWEEN_PLATFORMS,
@@ -67,13 +68,13 @@ export function placeLavaSurface() {
 		Math.floor(Math.random() * (PLATFORM.MAX_WIDTH - PLATFORM.MIN_WIDTH)) + PLATFORM.MIN_WIDTH
 	);
 	lava.setOnDestroy(lavaInstance => {
-		const idx = lavaSurfaces.indexOf(lavaInstance);
-		lavaSurfaces.splice(idx, 1);
+		const idx = game.lavaSurfaces.indexOf(lavaInstance);
+		game.lavaSurfaces.splice(idx, 1);
 		increaseScoreBy(GAME.PLATFORM_DESTROY_POINTS);
 		addParticles(lavaInstance);
 		lavaInstance.enemies.forEach(enemy => enemy?.onDestroy(enemy));
 	});
-	lavaSurfaces.push(lava);
+	game.lavaSurfaces.push(lava);
 	if (shouldGenerateSpider(lava, lava.height + POTATO.HEIGHT + SPIDER.HEIGHT + 100)) {
 		const spider = new SpiderEnemy(lava.x, lava.y, {
 			x: SPIDER.INITIAL_VELOCITY_X,
@@ -90,6 +91,24 @@ export function placeLavaSurface() {
 		spider.patrolPlatform(lava);
 		lava.addEnemy(spider);
 	}
+	if (shouldGeneratePowerUp()) {
+		const type = getRandomPowerUp();
+		const powerUp = new PowerUp(
+			lava.x,
+			lava.y,
+			{ x: POWER_UP.INITIAL_VELOCITY_X, y: POWER_UP.INITIAL_VELOCITY_Y },
+			type
+		);
+		powerUp.onImageLoad = () => {
+			powerUp.adjustPositionRelativeToPlatform(lava);
+		};
+		powerUp.setOnDestroy(powerUpInstance => {
+			const idx = lava.powerUps.indexOf(powerUpInstance);
+			lava.powerUps.splice(idx, 1);
+		});
+		powerUp.float();
+		lava.addPowerUp(powerUp);
+	}
 }
 
 export function gameOverModal() {
@@ -99,11 +118,13 @@ export function gameOverModal() {
 }
 
 export function gameOver() {
+	const game = GameManager.getInstance();
 	cancelAnimationFrame(game.animationId);
 	gameOverModal();
 	removeResizeListener();
 	clearEventListeners();
 	saveScore(game.score);
+	clearInterval(game.killerRootsIntervalId);
 	AudioService.getInstance().stopAllSounds();
 	document.querySelector('.highscore').innerText = getHighscore();
 	// fixes bug where after clicking "play again", if one of the arrows was still pressed upon death,
@@ -128,11 +149,15 @@ function shouldGenerateSpider(lava, miniumHeight = 0) {
 }
 
 export function increaseScoreBy(amount) {
+	const game = GameManager.getInstance();
+	if (potatoHasPowerUp('double-score')) {
+		amount *= 2;
+	}
 	game.score += amount;
 }
 
 export function resetScore() {
-	game.score = GAME.INITIAL_SCORE;
+	GameManager.getInstance().score = GAME.INITIAL_SCORE;
 }
 
 export function addParticles(destroyedEntity) {
@@ -141,7 +166,7 @@ export function addParticles(destroyedEntity) {
 	const verticalMiddle = destroyedEntity.y + destroyedEntity.height / 2;
 	const radius = Math.random() * 2;
 	for (let i = 0; i < destroyedEntity.width * 2; i++) {
-		particles.push(
+		GameManager.getInstance().particles.push(
 			new Particle(horizontalMiddle, verticalMiddle, radius, color, {
 				x: (Math.random() - 0.5) * (Math.random() * 6),
 				y: Math.random() - 0.5 * (Math.random() * 6),
@@ -155,16 +180,17 @@ export function playBackgroundMusic() {
 }
 
 export function generateNeededPlatforms(lavaSurface) {
-	const indexOfPlatform = lavaSurfaces.indexOf(lavaSurface);
+	const game = GameManager.getInstance();
+	const indexOfPlatform = game.lavaSurfaces.indexOf(lavaSurface);
 
 	generateLavaSurfaces(
-		Math.max(GAME.AHEAD_WINDOW - (lavaSurfaces.length - 1 - indexOfPlatform), 0)
+		Math.max(GAME.AHEAD_WINDOW - (game.lavaSurfaces.length - 1 - indexOfPlatform), 0)
 	);
-	lavaSurfaces.splice(0, Math.max(indexOfPlatform - GAME.DISCARD_AFTER, 0));
+	game.lavaSurfaces.splice(0, Math.max(indexOfPlatform - GAME.DISCARD_AFTER, 0));
 }
 
 export function generateNeededRoots() {
-	const combinedRootsWidth = roots.reduce((combinedWidth, currRoot) => {
+	const combinedRootsWidth = GameManager.getInstance().roots.reduce((combinedWidth, currRoot) => {
 		return combinedWidth + currRoot.width;
 	}, 0);
 
@@ -175,24 +201,27 @@ export function generateNeededRoots() {
 }
 
 export function placeRoots() {
-	const lastRoots = roots[roots.length - 1] || { x: 0, y: canvas.height - 540, width: 0 };
+	const game = GameManager.getInstance();
+	const lastRoots = game.roots[game.roots.length - 1] || { x: 0, y: canvas.height - 540, width: 0 };
 	const newRoots = new Roots(lastRoots.x + lastRoots.width, lastRoots.y);
 
 	// fixes bug where roots didn't fill the entire screen width
-	if (roots.length) {
+	if (game.roots.length) {
 		newRoots.onImageLoad = () => {
 			newRoots.adjustPositionRelativeToLastRoots(lastRoots);
 		};
 	}
 
-	roots.push(newRoots);
+	game.roots.push(newRoots);
 }
 
 export function generateKillerRoots() {
-	setInterval(() => {
-		const lastLavaSurfaceIndex = lavaSurfaces.indexOf(game.latestLandingSurface);
-		const nextLavaSurface = lavaSurfaces[lastLavaSurfaceIndex + 2];
-		const afterNextLavaSurface = lavaSurfaces[lastLavaSurfaceIndex + 3];
+	const game = GameManager.getInstance();
+	game.killerRootsIntervalId = setInterval(() => {
+		const game = GameManager.getInstance();
+		const lastLavaSurfaceIndex = game.lavaSurfaces.indexOf(game.latestLandingSurface);
+		const nextLavaSurface = game.lavaSurfaces[lastLavaSurfaceIndex + 2];
+		const afterNextLavaSurface = game.lavaSurfaces[lastLavaSurfaceIndex + 3];
 		const diff = afterNextLavaSurface.x + nextLavaSurface.x + nextLavaSurface.width;
 		const middle = Math.floor(diff / 2);
 		const x = middle - 21;
@@ -201,6 +230,23 @@ export function generateKillerRoots() {
 }
 
 export function summonKillerRoot(x) {
-	const killerRoot = new KillerRoot(x, canvas.height, { x: 0, y: -5 });
-	killerRoots.push(killerRoot);
+	const killerRoot = new KillerRoot(x, canvas.height, {
+		x: 0,
+		y: KILLER_ROOT.INITIAL_VERTICAL_VELOCITY,
+	});
+	GameManager.getInstance().killerRoots.push(killerRoot);
+}
+
+export function shouldGeneratePowerUp() {
+	return !getRandomInt(0, POWER_UP.CHANCE_TO_GENERATE);
+}
+
+export function getRandomPowerUp() {
+	const idx = getRandomInt(0, POWER_UP.TYPES.length - 1);
+	return POWER_UP.TYPES[idx];
+}
+
+export function potatoHasPowerUp(type) {
+	const game = GameManager.getInstance();
+	return !!game.potato.activePowerUps.find(powerUp => powerUp.type === type);
 }

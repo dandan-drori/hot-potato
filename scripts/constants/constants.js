@@ -1,10 +1,12 @@
 export const POTATO = {
 	GRAVITY: 0.5,
 	MAX_JUMP: 2,
+	MAX_JUMP_WITH_POWER_UP: 3,
 	AVATARS: [
 		'../../assets/images/potato.png',
 		['../../assets/images/smushed.png', '../../assets/images/jumping.png'],
 		'../../assets/images/double jump.png',
+		'../../assets/images/potato.png',
 	],
 	MAX_JUMP_HEIGHT: 400,
 	HEIGHT: 57,
@@ -54,4 +56,20 @@ export const SPIDER = {
 	WIDTH: 122,
 	INITIAL_VELOCITY_X: 0,
 	INITIAL_VELOCITY_Y: 0,
+};
+
+export const POWER_UP = {
+	TYPES: ['invincible', 'double-score', 'triple-jump'],
+	TYPE_TO_IMAGE: {
+		invincible: '../../assets/images/potato.png',
+		'double-score': '../../assets/images/jumping.png',
+		'triple-jump': '../../assets/images/double jump.png',
+	},
+	CHANCE_TO_GENERATE: 10,
+	INITIAL_VELOCITY_X: 0,
+	INITIAL_VELOCITY_Y: 0,
+};
+
+export const KILLER_ROOT = {
+	INITIAL_VERTICAL_VELOCITY: -20,
 };

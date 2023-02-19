@@ -9,90 +9,105 @@ import {
 import {
 	init,
 	drawBackground,
-	potato,
-	roots,
-	lavaSurfaces,
-	particles,
 	generateLavaSurfaces,
 	generateNeededPlatforms,
 	generateNeededRoots,
-	game,
 	gameOver,
 	increaseScoreBy,
 	resetScore,
 	playBackgroundMusic,
-	killerRoots,
 	generateKillerRoots,
+	potatoHasPowerUp,
 } from './scripts/services/game.service.js';
+import { GameManager } from './scripts/services/game-manager.service.js';
 import {
 	isCollided,
 	isCollidedFromLeft,
 	isCollidedFromRight,
+	isCollidedFromAnyDirection,
 } from './scripts/services/util.service.js';
 
 const scoreEl = document.querySelector('.score');
 
 function animate() {
+	const game = GameManager.getInstance();
 	game.animationId = requestAnimationFrame(animate);
 	ctx.fillStyle = CANVAS.FILL_STYLE;
 	ctx.fillRect(0, 0, canvas.width, canvas.height);
 	drawBackground();
 	generateNeededRoots();
-	const startingSurface = lavaSurfaces[0];
-	if (!potato.initialized || !startingSurface.initialized) return;
+	const startingSurface = game.lavaSurfaces[0];
+	if (!game.potato.initialized || !startingSurface.initialized) return;
 
 	// loop over roots
-	roots.forEach(root => {
+	game.roots.forEach(root => {
 		root.draw();
 	});
 
 	// loop over killerRoots
-	killerRoots.forEach(killerRoot => {
+	game.killerRoots.forEach(killerRoot => {
 		killerRoot.update();
-		if (keys.right.pressed && potato.x >= PLAYER.RIGHT_BORDER) {
+		if (keys.right.pressed && game.potato.x >= PLAYER.RIGHT_BORDER) {
 			killerRoot.x -= GAME.SCROLL_BACKGROUND_HORIZONTAL_SPEED;
-		} else if (keys.left.pressed && potato.x <= PLAYER.LEFT_BORDER) {
+		} else if (keys.left.pressed && game.potato.x <= PLAYER.LEFT_BORDER) {
 			killerRoot.x += GAME.SCROLL_BACKGROUND_HORIZONTAL_SPEED;
+		}
+
+		if (isCollidedFromAnyDirection(game.potato, killerRoot)) {
+			if (!potatoHasPowerUp('invincible')) {
+				gameOver();
+			}
 		}
 	});
 
 	// loop over particles
-	particles.forEach((particle, index) => {
+	game.particles.forEach((particle, index) => {
 		// if particle should be removed, remove it, else, keep updating it
 		if (particle.alpha <= 0) {
-			particles.splice(index, 1);
+			game.particles.splice(index, 1);
 		} else {
 			particle.update();
-			if (keys.right.pressed && potato.x >= PLAYER.RIGHT_BORDER) {
+			if (keys.right.pressed && game.potato.x >= PLAYER.RIGHT_BORDER) {
 				particle.x -= GAME.SCROLL_BACKGROUND_HORIZONTAL_SPEED;
-			} else if (keys.left.pressed && potato.x <= PLAYER.LEFT_BORDER) {
+			} else if (keys.left.pressed && game.potato.x <= PLAYER.LEFT_BORDER) {
 				particle.x += GAME.SCROLL_BACKGROUND_HORIZONTAL_SPEED;
 			}
 		}
 	});
 
 	// If player collides with starting surface from above, stop falling
-	if (isCollided(potato, startingSurface)) {
-		potato.land();
+	if (isCollided(game.potato, startingSurface)) {
+		game.potato.land();
 	}
 
 	// loop over lava surfaces
-	lavaSurfaces.forEach(lavaSurface => {
+	game.lavaSurfaces.forEach(lavaSurface => {
 		lavaSurface.update();
 
-		if (keys.right.pressed && potato.x >= PLAYER.RIGHT_BORDER) {
+		if (keys.right.pressed && game.potato.x >= PLAYER.RIGHT_BORDER) {
 			lavaSurface.x -= GAME.SCROLL_BACKGROUND_HORIZONTAL_SPEED;
-		} else if (keys.left.pressed && potato.x <= PLAYER.LEFT_BORDER) {
+		} else if (keys.left.pressed && game.potato.x <= PLAYER.LEFT_BORDER) {
 			lavaSurface.x += GAME.SCROLL_BACKGROUND_HORIZONTAL_SPEED;
+		}
+
+		// If player collides with lava surfaces from above, stop falling
+		if (isCollided(game.potato, lavaSurface)) {
+			if (lavaSurface !== game.latestLandingSurface) {
+				lavaSurface?.startBlinking();
+				generateNeededPlatforms(lavaSurface);
+			}
+
+			game.potato.land();
+			game.latestLandingSurface = lavaSurface;
 		}
 
 		// update enemies on the platform
 		lavaSurface.enemies?.forEach(enemy => {
 			enemy.update();
 
-			if (keys.right.pressed && potato.x >= PLAYER.RIGHT_BORDER) {
+			if (keys.right.pressed && game.potato.x >= PLAYER.RIGHT_BORDER) {
 				enemy.x -= GAME.SCROLL_BACKGROUND_HORIZONTAL_SPEED;
-			} else if (keys.left.pressed && potato.x <= PLAYER.LEFT_BORDER) {
+			} else if (keys.left.pressed && game.potato.x <= PLAYER.LEFT_BORDER) {
 				enemy.x += GAME.SCROLL_BACKGROUND_HORIZONTAL_SPEED;
 			}
 
@@ -102,32 +117,45 @@ function animate() {
 				lavaSurface.enemies.splice(idx, 1);
 			}
 
-			if (isCollided(potato, enemy)) {
+			if (isCollided(game.potato, enemy)) {
 				enemy.onDestroy(enemy);
-				potato.jump(true);
+				game.potato.jump(true);
 				increaseScoreBy(GAME.ENEMY_KILL_POINTS);
-			} else if (isCollidedFromLeft(potato, enemy) || isCollidedFromRight(potato, enemy)) {
-				gameOver();
+			} else if (
+				isCollidedFromLeft(game.potato, enemy) ||
+				isCollidedFromRight(game.potato, enemy)
+			) {
+				if (potatoHasPowerUp('invincible')) {
+					enemy.onDestroy(enemy);
+					increaseScoreBy(GAME.ENEMY_KILL_POINTS);
+				} else {
+					gameOver();
+				}
 			}
 		});
 
-		// If player collides with lava surfaces from above, stop falling
-		if (isCollided(potato, lavaSurface)) {
-			if (lavaSurface !== game.latestLandingSurface) {
-				lavaSurface?.startBlinking();
-				generateNeededPlatforms(lavaSurface);
+		lavaSurface.powerUps?.forEach(powerUp => {
+			powerUp.update();
+
+			if (keys.right.pressed && game.potato.x >= PLAYER.RIGHT_BORDER) {
+				powerUp.x -= GAME.SCROLL_BACKGROUND_HORIZONTAL_SPEED;
+			} else if (keys.left.pressed && game.potato.x <= PLAYER.LEFT_BORDER) {
+				powerUp.x += GAME.SCROLL_BACKGROUND_HORIZONTAL_SPEED;
 			}
 
-			potato.land();
-			game.latestLandingSurface = lavaSurface;
-		}
+			if (isCollidedFromAnyDirection(game.potato, powerUp)) {
+				console.log('earned', powerUp.type);
+				game.potato.addPowerUp(powerUp);
+				powerUp.onDestroy();
+			}
+		});
 	});
 
 	// Limit the player movement to certain boundaries, and then start moving everything else instead
-	if (keys.right.pressed && potato.x < PLAYER.RIGHT_BORDER) {
-		potato.velocity.x = PLAYER.HORIZONTAL_VELOCITY;
-	} else if (keys.left.pressed && potato.x > PLAYER.LEFT_BORDER) {
-		potato.velocity.x = -PLAYER.HORIZONTAL_VELOCITY;
+	if (keys.right.pressed && game.potato.x < PLAYER.RIGHT_BORDER) {
+		game.potato.velocity.x = PLAYER.HORIZONTAL_VELOCITY;
+	} else if (keys.left.pressed && game.potato.x > PLAYER.LEFT_BORDER) {
+		game.potato.velocity.x = -PLAYER.HORIZONTAL_VELOCITY;
 	} else {
 		if (keys.right.pressed) {
 			increaseScoreBy(GAME.SCROLL_OFFSET_POINTS);
@@ -136,15 +164,15 @@ function animate() {
 		if (game.score >= GAME.INITIAL_SCORE) {
 			scoreEl.innerText = game.score;
 		}
-		potato.velocity.x = PLAYER.INITIAL_HORIZONTAL_VELOCITY;
+		game.potato.velocity.x = PLAYER.INITIAL_HORIZONTAL_VELOCITY;
 	}
 
 	// If player collides with the ceiling, reset his vertical speed
-	if (potato.y + potato.velocity.y <= 0) {
-		potato.velocity.y = PLAYER.INITIAL_VERTICAL_VELOCITY;
+	if (game.potato.y + game.potato.velocity.y <= 0) {
+		game.potato.velocity.y = PLAYER.INITIAL_VERTICAL_VELOCITY;
 	}
 
-	potato.update();
+	game.potato.update();
 }
 
 export function start() {
@@ -160,7 +188,7 @@ export function start() {
 	removeEventListener('keyup', startOnPress);
 	resetScore();
 	playBackgroundMusic();
-	scoreEl.innerText = game.score;
+	scoreEl.innerText = GameManager.getInstance().score;
 }
 
 function goToHome() {
