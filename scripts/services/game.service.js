@@ -1,4 +1,10 @@
-import { getRandomInt } from './util.service.js';
+import {
+	getRandomInt,
+	isCollided,
+	isCollidedFromAnyDirection,
+	isCollidedFromLeft,
+	isCollidedFromRight
+} from './util.service.js';
 import { Potato } from '../entities/Potato.js';
 import { Lava } from '../entities/Lava.js';
 import { StartingSurface } from '../entities/StartingSurface.js';
@@ -249,4 +255,141 @@ export function getRandomPowerUp() {
 export function potatoHasPowerUp(type) {
 	const game = GameManager.getInstance();
 	return !!game.potato.activePowerUps.find(powerUp => powerUp.type === type);
+}
+
+export function updateEnemies(game, lavaSurface) {
+	lavaSurface.enemies?.forEach(enemy => {
+		enemy.update();
+
+		if (keys.right.pressed && game.potato.x >= PLAYER.RIGHT_BORDER) {
+			enemy.x -= GAME.SCROLL_BACKGROUND_HORIZONTAL_SPEED;
+		} else if (keys.left.pressed && game.potato.x <= PLAYER.LEFT_BORDER) {
+			enemy.x += GAME.SCROLL_BACKGROUND_HORIZONTAL_SPEED;
+		}
+
+		// if spider has fallen, stop rendering it
+		if (enemy.y > canvas.height) {
+			const idx = lavaSurface.enemies.indexOf(enemy);
+			lavaSurface.enemies.splice(idx, 1);
+		}
+
+		if (isCollided(game.potato, enemy)) {
+			enemy.onDestroy(enemy);
+			game.potato.jump(true);
+			increaseScoreBy(GAME.ENEMY_KILL_POINTS);
+		} else if (
+			isCollidedFromLeft(game.potato, enemy) ||
+			isCollidedFromRight(game.potato, enemy)
+		) {
+			if (potatoHasPowerUp('invincible')) {
+				enemy.onDestroy(enemy);
+				increaseScoreBy(GAME.ENEMY_KILL_POINTS);
+			} else {
+				gameOver();
+			}
+		}
+	});
+}
+
+export function updatePowerUps(game, lavaSurface) {
+	lavaSurface.powerUps?.forEach(powerUp => {
+		powerUp.update();
+
+		if (keys.right.pressed && game.potato.x >= PLAYER.RIGHT_BORDER) {
+			powerUp.x -= GAME.SCROLL_BACKGROUND_HORIZONTAL_SPEED;
+		} else if (keys.left.pressed && game.potato.x <= PLAYER.LEFT_BORDER) {
+			powerUp.x += GAME.SCROLL_BACKGROUND_HORIZONTAL_SPEED;
+		}
+
+		if (isCollidedFromAnyDirection(game.potato, powerUp)) {
+			game.potato.addPowerUp(powerUp);
+			powerUp.onDestroy();
+		}
+	});
+}
+
+export function updateLavaSurfaces(game) {
+	game.lavaSurfaces.forEach(lavaSurface => {
+		lavaSurface.update();
+
+		if (keys.right.pressed && game.potato.x >= PLAYER.RIGHT_BORDER) {
+			lavaSurface.x -= GAME.SCROLL_BACKGROUND_HORIZONTAL_SPEED;
+		} else if (keys.left.pressed && game.potato.x <= PLAYER.LEFT_BORDER) {
+			lavaSurface.x += GAME.SCROLL_BACKGROUND_HORIZONTAL_SPEED;
+		}
+
+		// If player collides with lava surfaces from above, stop falling
+		if (isCollided(game.potato, lavaSurface)) {
+			if (lavaSurface !== game.latestLandingSurface) {
+				lavaSurface?.startBlinking();
+				generateNeededPlatforms(lavaSurface);
+			}
+
+			game.potato.land();
+			game.latestLandingSurface = lavaSurface;
+		}
+
+		// update enemies on the platform
+		updateEnemies(game, lavaSurface);
+
+		// update powerUps
+		updatePowerUps(game, lavaSurface);
+	});
+}
+
+export function updateParticles(game) {
+	game.particles.forEach((particle, index) => {
+		// if particle should be removed, remove it, else, keep updating it
+		if (particle.alpha <= 0) {
+			game.particles.splice(index, 1);
+		} else {
+			particle.update();
+			if (keys.right.pressed && game.potato.x >= PLAYER.RIGHT_BORDER) {
+				particle.x -= GAME.SCROLL_BACKGROUND_HORIZONTAL_SPEED;
+			} else if (keys.left.pressed && game.potato.x <= PLAYER.LEFT_BORDER) {
+				particle.x += GAME.SCROLL_BACKGROUND_HORIZONTAL_SPEED;
+			}
+		}
+	});
+}
+
+export function updateKillerRoots(game) {
+	game.killerRoots.forEach(killerRoot => {
+		killerRoot.update();
+		if (keys.right.pressed && game.potato.x >= PLAYER.RIGHT_BORDER) {
+			killerRoot.x -= GAME.SCROLL_BACKGROUND_HORIZONTAL_SPEED;
+		} else if (keys.left.pressed && game.potato.x <= PLAYER.LEFT_BORDER) {
+			killerRoot.x += GAME.SCROLL_BACKGROUND_HORIZONTAL_SPEED;
+		}
+
+		if (isCollidedFromAnyDirection(game.potato, killerRoot)) {
+			if (!potatoHasPowerUp('invincible')) {
+				gameOver();
+			}
+		}
+	});
+}
+
+export function updatePlayerMovement(game, scoreEl) {
+	if (keys.right.pressed && game.potato.x < PLAYER.RIGHT_BORDER) {
+		game.potato.velocity.x = PLAYER.HORIZONTAL_VELOCITY;
+	} else if (keys.left.pressed && game.potato.x > PLAYER.LEFT_BORDER) {
+		game.potato.velocity.x = -PLAYER.HORIZONTAL_VELOCITY;
+	} else {
+		if (keys.right.pressed) {
+			increaseScoreBy(GAME.SCROLL_OFFSET_POINTS);
+		}
+
+		if (game.score >= GAME.INITIAL_SCORE) {
+			scoreEl.innerText = game.score;
+		}
+		game.potato.velocity.x = PLAYER.INITIAL_HORIZONTAL_VELOCITY;
+	}
+
+	// If player collides with the ceiling, reset his vertical speed
+	if (game.potato.y + game.potato.velocity.y <= 0) {
+		game.potato.velocity.y = PLAYER.INITIAL_VERTICAL_VELOCITY;
+	}
+
+	game.potato.update();
 }
