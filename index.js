@@ -1,4 +1,4 @@
-import { GAME, PLAYER, CANVAS } from './scripts/constants/constants.js';
+import { GAME, PLAYER, CANVAS, POTATO } from './scripts/constants/constants.js';
 import { ctx, canvas, fitCanvasToWindow } from './scripts/services/canvas.service.js';
 import {
 	keys,
@@ -20,6 +20,7 @@ import {
 	potatoHasPowerUp,
 } from './scripts/services/game.service.js';
 import { GameManager } from './scripts/services/game-manager.service.js';
+import { ImageService } from './scripts/services/image.service.js';
 import {
 	isCollided,
 	isCollidedFromLeft,
@@ -179,6 +180,7 @@ export function start() {
 	document.querySelector('.game-over-modal').style.display = 'none';
 	document.getElementById('home').style.display = 'none';
 	document.querySelector('.score-container').style.display = 'block';
+	ImageService.getInstance().preloadImages(POTATO.AVATARS);
 	init();
 	requestAnimationFrame(animate);
 	generateLavaSurfaces(GAME.INITIAL_WINDOW);

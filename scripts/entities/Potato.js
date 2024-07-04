@@ -3,12 +3,12 @@ import { ctx } from '../services/canvas.service.js';
 import { gameOver, potatoHasPowerUp } from '../services/game.service.js';
 import { DimensionImageEntity } from './DimensionImageEntity.js';
 import { AudioService } from '../services/audio.service.js';
+import { ImageService } from '../services/image.service.js';
 
 export class Potato extends DimensionImageEntity {
 	constructor(x, y, velocity) {
-		const image = new Image();
-		image.src = '../../assets/images/potato.png';
-		super(image);
+		const potatoImage = ImageService.getInstance().avatarImages[0];
+		super(potatoImage);
 
 		this.x = x;
 		this.y = y;
@@ -41,7 +41,7 @@ export class Potato extends DimensionImageEntity {
 			() => {
 				// only change to jump avatar if not in super jump
 				if (currJumpCount !== this.jumpCount) return;
-				this.image.src = avatar[counter];
+				this.image = avatar[counter];
 				// don't change avatars if there are not more avatars to change to
 				if (counter >= avatar.length - 1) return;
 				this.animateAvatar(avatar, counter + 1);
@@ -64,7 +64,7 @@ export class Potato extends DimensionImageEntity {
 		this.jumpCount++;
 		this.velocity.y = isEnemyHit ? POTATO.BOUNCE_SPEED_AFTER_HITTING_ENEMY : POTATO.JUMP_SPEED;
 
-		const avatar = POTATO.AVATARS[this.jumpCount];
+		const avatar = ImageService.getInstance().avatarImages[this.jumpCount];
 		const avatarArray = !Array.isArray(avatar) ? [avatar] : avatar;
 		this.animateAvatar(avatarArray);
 		AudioService.getInstance().playSound('jump');
@@ -73,7 +73,8 @@ export class Potato extends DimensionImageEntity {
 	land() {
 		this.jumpCount = POTATO.INITIAL_JUMP_COUNT;
 		this.velocity.y = PLAYER.INITIAL_VERTICAL_VELOCITY;
-		this.animateAvatar([POTATO.AVATARS[this.jumpCount]]);
+		const avatar = ImageService.getInstance().avatarImages[this.jumpCount];
+		this.animateAvatar([avatar]);
 	}
 
 	addPowerUp(powerUp) {
