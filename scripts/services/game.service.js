@@ -23,9 +23,10 @@ import {
 	KILLER_ROOT,
 } from '../constants/constants.js';
 import { AudioService } from './audio.service.js';
+import { ElementsService } from './elements.service.js';
 import { Roots } from '../entities/Roots.js';
 import { KillerRoot } from '../entities/KillerRoot.js';
-import { GameManager } from '../services/game-manager.service.js';
+import { GameManager } from './game-manager.service.js';
 import { PowerUp } from '../entities/PowerUp.js';
 
 let backgroundImage = new Image();
@@ -38,7 +39,7 @@ export function init() {
 	});
 	const startingSurface = new StartingSurface(PLAYER.INITIAL_X, canvas.height / 2, {
 		x: PLATFORM.INITIAL_VELOCITY_X,
-		y: PLATFORM.INITIAL_VELOCITY_X,
+		y: PLATFORM.INITIAL_VELOCITY_Y,
 	});
 	game.lavaSurfaces = [startingSurface];
 	game.particles = [];
@@ -54,72 +55,21 @@ export function generateLavaSurfaces(numToGenerate = 1) {
 
 export function placeLavaSurface() {
 	const game = GameManager.getInstance();
-	const lastLavaSurface = game.lavaSurfaces[game.lavaSurfaces.length - 1];
-	const lastLavaSurfaceWidth = lastLavaSurface.width || PLATFORM.DEFAULT_WIDTH;
-	const x = getRandomInt(
-		lastLavaSurface.x + lastLavaSurfaceWidth + PLATFORM.MIN_X_DISTANCE_BETWEEN_PLATFORMS,
-		lastLavaSurface.x + lastLavaSurfaceWidth + PLATFORM.MAX_X_DISTANCE_BETWEEN_PLATFORMS
-	);
-	const distanceFromCeil = lastLavaSurface.y;
-	const nextYMin =
-		distanceFromCeil > POTATO.MAX_JUMP_HEIGHT
-			? lastLavaSurface.y - POTATO.MAX_JUMP_HEIGHT + POTATO.HEIGHT
-			: lastLavaSurface.height + POTATO.HEIGHT * 2 + SPIDER.HEIGHT;
-	const nextYMax = canvas.height - lastLavaSurface.height - POTATO.HEIGHT;
-	const y = getRandomInt(nextYMin, nextYMax);
-	const lava = new Lava(
-		x,
-		y,
-		{ x: PLATFORM.INITIAL_VELOCITY_X, y: PLATFORM.INITIAL_VELOCITY_Y },
-		Math.floor(Math.random() * (PLATFORM.MAX_WIDTH - PLATFORM.MIN_WIDTH)) + PLATFORM.MIN_WIDTH
-	);
-	lava.setOnDestroy(lavaInstance => {
-		const idx = game.lavaSurfaces.indexOf(lavaInstance);
-		game.lavaSurfaces.splice(idx, 1);
-		increaseScoreBy(GAME.PLATFORM_DESTROY_POINTS);
-		addParticles(lavaInstance);
-		lavaInstance.enemies.forEach(enemy => enemy?.onDestroy(enemy));
-	});
+	const lava = generateLava(game);
 	game.lavaSurfaces.push(lava);
 	if (shouldGenerateSpider(lava, lava.height + POTATO.HEIGHT + SPIDER.HEIGHT + 100)) {
-		const spider = new SpiderEnemy(lava.x, lava.y, {
-			x: SPIDER.INITIAL_VELOCITY_X,
-			y: SPIDER.INITIAL_VELOCITY_Y,
-		});
-		spider.onImageLoad = () => {
-			spider.adjustPositionRelativeToPlatform(lava);
-		};
-		spider.setOnDestroy(enemyInstance => {
-			// const idx = lava.enemies.indexOf(enemyInstance);
-			// lava.enemies.splice(idx, 1);
-			enemyInstance.fall();
-		});
-		spider.patrolPlatform(lava);
+		const spider = generateSpider(lava);
 		lava.addEnemy(spider);
 	}
 	if (shouldGeneratePowerUp()) {
-		const type = getRandomPowerUp();
-		const powerUp = new PowerUp(
-			lava.x,
-			lava.y,
-			{ x: POWER_UP.INITIAL_VELOCITY_X, y: POWER_UP.INITIAL_VELOCITY_Y },
-			type
-		);
-		powerUp.onImageLoad = () => {
-			powerUp.adjustPositionRelativeToPlatform(lava);
-		};
-		powerUp.setOnDestroy(powerUpInstance => {
-			const idx = lava.powerUps.indexOf(powerUpInstance);
-			lava.powerUps.splice(idx, 1);
-		});
-		powerUp.float();
+		const powerUp = generatePowerUp(lava);
 		lava.addPowerUp(powerUp);
 	}
 }
 
 export function gameOverModal() {
-	document.querySelector('.game-over-modal').style.display = 'flex';
-	document.querySelector('body').style.backgroundColor = 'rgba(0, 0, 0, 0.7)';
+	ElementsService.getInstance().getElement('.game-over-modal').style.display = 'flex';
+	ElementsService.getInstance().getElement('body').style.backgroundColor = 'rgba(0, 0, 0, 0.7)';
 	addSpacePressListener();
 }
 
@@ -132,7 +82,7 @@ export function gameOver() {
 	saveScore(game.score);
 	clearInterval(game.killerRootsIntervalId);
 	AudioService.getInstance().stopAllSounds();
-	document.querySelector('.highscore').innerText = getHighscore();
+	ElementsService.getInstance().getElement('.highscore').innerText = getHighscore();
 	// fixes bug where after clicking "play again", if one of the arrows was still pressed upon death,
 	// the potato starts moving without pressing any key
 	keys.right.pressed = false;
@@ -152,6 +102,23 @@ function shouldGenerateSpider(lava, miniumHeight = 0) {
 	const chanceToGenerate = !getRandomInt(0, 5);
 	const platformIsFarEnoughFromCeiling = lava.y > miniumHeight;
 	return isPlatformWideEnoughForSpider && chanceToGenerate && platformIsFarEnoughFromCeiling;
+}
+
+function generateSpider(lava) {
+	const spider = new SpiderEnemy(lava.x, lava.y, {
+		x: SPIDER.INITIAL_VELOCITY_X,
+		y: SPIDER.INITIAL_VELOCITY_Y,
+	});
+	spider.onImageLoad = () => {
+		spider.adjustPositionRelativeToPlatform(lava);
+	};
+	spider.setOnDestroy(enemyInstance => {
+		// const idx = lava.enemies.indexOf(enemyInstance);
+		// lava.enemies.splice(idx, 1);
+		enemyInstance.fall();
+	});
+	spider.patrolPlatform(lava);
+	return spider;
 }
 
 export function increaseScoreBy(amount) {
@@ -381,7 +348,7 @@ export function updatePlayerMovement(game, scoreEl) {
 		}
 
 		if (game.score >= GAME.INITIAL_SCORE) {
-			scoreEl.innerText = game.score;
+			ElementsService.getInstance().getElement('.score').innerText = game.score;
 		}
 		game.potato.velocity.x = PLAYER.INITIAL_HORIZONTAL_VELOCITY;
 	}
@@ -392,4 +359,53 @@ export function updatePlayerMovement(game, scoreEl) {
 	}
 
 	game.potato.update();
+}
+
+function generatePowerUp(lava) {
+	const type = getRandomPowerUp();
+	const powerUp = new PowerUp(
+		lava.x,
+		lava.y,
+		{ x: POWER_UP.INITIAL_VELOCITY_X, y: POWER_UP.INITIAL_VELOCITY_Y },
+		type
+	);
+	powerUp.onImageLoad = () => {
+		powerUp.adjustPositionRelativeToPlatform(lava);
+	};
+	powerUp.setOnDestroy(powerUpInstance => {
+		const idx = lava.powerUps.indexOf(powerUpInstance);
+		lava.powerUps.splice(idx, 1);
+	});
+	powerUp.float();
+	return powerUp;
+}
+
+function generateLava(game) {
+	const lastLavaSurface = game.lavaSurfaces[game.lavaSurfaces.length - 1];
+	const lastLavaSurfaceWidth = lastLavaSurface.width || PLATFORM.DEFAULT_WIDTH;
+	const x = getRandomInt(
+		lastLavaSurface.x + lastLavaSurfaceWidth + PLATFORM.MIN_X_DISTANCE_BETWEEN_PLATFORMS,
+		lastLavaSurface.x + lastLavaSurfaceWidth + PLATFORM.MAX_X_DISTANCE_BETWEEN_PLATFORMS
+	);
+	const distanceFromCeil = lastLavaSurface.y;
+	const nextYMin =
+		distanceFromCeil > POTATO.MAX_JUMP_HEIGHT
+			? lastLavaSurface.y - POTATO.MAX_JUMP_HEIGHT + POTATO.HEIGHT
+			: lastLavaSurface.height + POTATO.HEIGHT * 2 + SPIDER.HEIGHT;
+	const nextYMax = canvas.height - lastLavaSurface.height - POTATO.HEIGHT;
+	const y = getRandomInt(nextYMin, nextYMax);
+	const lava = new Lava(
+		x,
+		y,
+		{ x: PLATFORM.INITIAL_VELOCITY_X, y: PLATFORM.INITIAL_VELOCITY_Y },
+		Math.floor(Math.random() * (PLATFORM.MAX_WIDTH - PLATFORM.MIN_WIDTH)) + PLATFORM.MIN_WIDTH
+	);
+	lava.setOnDestroy(lavaInstance => {
+		const idx = game.lavaSurfaces.indexOf(lavaInstance);
+		game.lavaSurfaces.splice(idx, 1);
+		increaseScoreBy(GAME.PLATFORM_DESTROY_POINTS);
+		addParticles(lavaInstance);
+		lavaInstance.enemies.forEach(enemy => enemy?.onDestroy(enemy));
+	});
+	return lava;
 }

@@ -14,10 +14,9 @@ import {
 } from './scripts/services/game.service.js';
 import { GameManager } from './scripts/services/game-manager.service.js';
 import { ImageService } from './scripts/services/image.service.js';
+import { ElementsService } from './scripts/services/elements.service.js';
 import { isCollided } from './scripts/services/util.service.js';
 import { navigate, registerEventListeners } from './scripts/utilities/cosmetics.util.js';
-
-const scoreEl = document.querySelector('.score');
 
 function animate() {
 	const game = GameManager.getInstance();
@@ -49,7 +48,7 @@ function animate() {
 	updateLavaSurfaces(game);
 
 	// Limit the player movement to certain boundaries, and then start moving everything else instead
-	updatePlayerMovement(game, scoreEl);
+	updatePlayerMovement(game);
 }
 
 export function start() {
@@ -64,12 +63,12 @@ export function start() {
 	removeEventListener('keyup', startOnPress);
 	resetScore();
 	playBackgroundMusic();
-	scoreEl.innerText = GameManager.getInstance().score;
+	ElementsService.getInstance().getElement('.score').innerText = GameManager.getInstance().score;
 }
 
 
 window.onload = () => {
 	registerEventListeners();
-	if (document.getElementById('home').style.display === 'none') return;
+	if (ElementsService.getInstance().getElement('#home').style.display === 'none') return;
 	addEventListener('keyup', startOnPress);
 };
