@@ -67,6 +67,13 @@ body {
   font-size: 18px;
   letter-spacing: 1.05px;
 }
+.game-over-modal .actions-container {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  gap: 10px;
+}
 .game-over-modal h3 {
   font-family: "Emulogic";
   margin-bottom: 23px;
@@ -95,4 +102,7 @@ body {
   color: #fefefe;
   font-family: "Emulogic";
   font-size: 14px;
+}
+#canvas {
+  cursor: none;
 }/*# sourceMappingURL=styles.css.map */

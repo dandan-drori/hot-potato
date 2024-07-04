@@ -15,7 +15,7 @@ import {
 import { GameManager } from './scripts/services/game-manager.service.js';
 import { ImageService } from './scripts/services/image.service.js';
 import { isCollided } from './scripts/services/util.service.js';
-import { registerEventListeners } from './scripts/utilities/cosmetics.util.js';
+import { navigate, registerEventListeners } from './scripts/utilities/cosmetics.util.js';
 
 const scoreEl = document.querySelector('.score');
 
@@ -53,9 +53,7 @@ function animate() {
 }
 
 export function start() {
-	document.querySelector('.game-over-modal').style.display = 'none';
-	document.getElementById('home').style.display = 'none';
-	document.querySelector('.score-container').style.display = 'block';
+	navigate({ gameOverModal: 'none', score: 'block', home: 'none' });
 	ImageService.getInstance().preloadImages(POTATO.AVATARS);
 	init();
 	requestAnimationFrame(animate);
