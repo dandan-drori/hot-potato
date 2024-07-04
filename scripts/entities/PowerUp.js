@@ -41,7 +41,6 @@ export class PowerUp extends DimensionImageEntity {
 	}
 
 	float() {
-		console.log('floating...');
 		this.velocity.y = -0.3;
 	}
 }

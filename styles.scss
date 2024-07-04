@@ -72,6 +72,14 @@ body {
 		letter-spacing: 1.05px;
 	}
 
+	.actions-container {
+		display: flex;
+		flex-direction: column;
+		justify-content: center;
+		align-items: center;
+		gap: 10px;
+	}
+
 	h3 {
 		font-family: 'Emulogic';
 		margin-bottom: 23px;

@@ -145,7 +145,6 @@ function animate() {
 			}
 
 			if (isCollidedFromAnyDirection(game.potato, powerUp)) {
-				console.log('earned', powerUp.type);
 				game.potato.addPowerUp(powerUp);
 				powerUp.onDestroy();
 			}
