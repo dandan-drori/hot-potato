@@ -1,12 +1,11 @@
-import { POWER_UP } from '../constants/constants.js';
 import { ctx } from '../services/canvas.service.js';
 import { DimensionImageEntity } from './DimensionImageEntity.js';
 import { getRandomInt } from '../services/util.service.js';
+import { ImageService } from '../services/image.service.js';
 
 export class PowerUp extends DimensionImageEntity {
 	constructor(x, y, velocity, type) {
-		const image = new Image();
-		image.src = POWER_UP.TYPE_TO_IMAGE[type];
+		const image = ImageService.getInstance().powerUpImagesByType[type];
 		super(image);
 		this.x = x;
 		this.y = y;
@@ -41,6 +40,6 @@ export class PowerUp extends DimensionImageEntity {
 	}
 
 	float() {
-		this.velocity.y = -0.3;
+		this.velocity.y = 0.3;
 	}
 }

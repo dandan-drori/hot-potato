@@ -47,15 +47,13 @@ export function isCollidedFromAnyDirection(potato, entity) {
 	);
 }
 
-export function isFallingOffTheEdge(entity, platform) {
-	return isFallingOffRightEdge(entity, platform) || isFallingOffLeftEdge(entity, platform);
-}
-
 export function isFallingOffLeftEdge(entity, platform, entityWidth) {
 	const x = entity.x + (entityWidth ?? entity.width);
 
 	return (
-		x >= platform.x && x + entity.velocity.x <= platform.x && entity.y + entity.height <= platform.y
+		x >= platform.x &&
+		x + entity.velocity.x <= platform.x &&
+		entity.y + entity.height <= platform.y
 	);
 }
 

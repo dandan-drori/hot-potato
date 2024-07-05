@@ -16,6 +16,11 @@ export class Potato extends DimensionImageEntity {
 
 		this.jumpCount = POTATO.INITIAL_JUMP_COUNT;
 		this.activePowerUps = [];
+		this.powerUpsTimers = {
+			invincibility: undefined,
+			'triple-jump': undefined,
+			'double-score': undefined,
+		}
 	}
 
 	draw() {
@@ -80,7 +85,8 @@ export class Potato extends DimensionImageEntity {
 	addPowerUp(powerUp) {
 		this.removeTypePowerUps(powerUp.type);
 		this.activePowerUps.push(powerUp);
-		setTimeout(() => {
+		if (this.powerUpsTimers[powerUp.type]) clearTimeout(this.powerUpsTimers[powerUp.type]);
+		this.powerUpsTimers[powerUp.type] = setTimeout(() => {
 			const idx = this.activePowerUps.findIndex(
 				activePowerUp => activePowerUp.type === powerUp.type
 			);

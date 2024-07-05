@@ -6,7 +6,7 @@ import {
 	generateKillerRoots,
 	generateLavaSurfaces,
 	generateNeededRoots,
-	init,
+	initGameInstance,
 	playBackgroundMusic,
 	resetScore, updateKillerRoots,
 	updateLavaSurfaces,
@@ -54,7 +54,8 @@ function animate() {
 export function start() {
 	navigate({ gameOverModal: 'none', score: 'block', home: 'none' });
 	ImageService.getInstance().preloadImages(POTATO.AVATARS);
-	init();
+	ImageService.getInstance().loadPowerUpImages();
+	initGameInstance();
 	requestAnimationFrame(animate);
 	generateLavaSurfaces(GAME.INITIAL_WINDOW);
 	generateKillerRoots();

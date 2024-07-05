@@ -56,14 +56,15 @@ export const SPIDER = {
 	WIDTH: 122,
 	INITIAL_VELOCITY_X: 0,
 	INITIAL_VELOCITY_Y: 0,
+	PATROL_SPEED: 2,
 };
 
 export const POWER_UP = {
 	TYPES: ['invincible', 'double-score', 'triple-jump'],
 	TYPE_TO_IMAGE: {
-		invincible: '../../assets/images/potato.png',
-		'double-score': '../../assets/images/jumping.png',
-		'triple-jump': '../../assets/images/double jump.png',
+		invincible: '../../assets/images/invincibility.png',
+		'double-score': '../../assets/images/double-score.png',
+		'triple-jump': '../../assets/images/triple-jump.png',
 	},
 	CHANCE_TO_GENERATE: 10,
 	INITIAL_VELOCITY_X: 0,

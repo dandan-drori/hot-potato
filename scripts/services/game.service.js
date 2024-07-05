@@ -31,7 +31,7 @@ import { PowerUp } from '../entities/PowerUp.js';
 
 let backgroundImage = new Image();
 
-export function init() {
+export function initGameInstance() {
 	const game = GameManager.getInstance();
 	game.potato = new Potato(PLAYER.INITIAL_X, PLAYER.INITIAL_Y, {
 		x: PLAYER.INITIAL_HORIZONTAL_VELOCITY,
