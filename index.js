@@ -1,5 +1,5 @@
 import { CANVAS, GAME, POTATO } from './scripts/constants/constants.js';
-import { canvas, ctx, fitCanvasToWindow } from './scripts/services/canvas.service.js';
+import { canvas, ctx, fitCanvasToWindow, modifyCanvasDimensions } from './scripts/services/canvas.service.js';
 import { captureKeyboardEvents, startOnPress } from './scripts/services/keyboard.service.js';
 import {
 	drawBackground,
@@ -55,6 +55,7 @@ export function start() {
 	navigate({ gameOverModal: 'none', score: 'block', home: 'none' });
 	ImageService.getInstance().preloadImages(POTATO.AVATARS);
 	ImageService.getInstance().loadPowerUpImages();
+	modifyCanvasDimensions();
 	initGameInstance();
 	requestAnimationFrame(animate);
 	generateLavaSurfaces(GAME.INITIAL_WINDOW);

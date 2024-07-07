@@ -251,9 +251,9 @@ export function updateEnemies(game, lavaSurface) {
 			if (potatoHasPowerUp('invincible')) {
 				enemy.onDestroy(enemy);
 				increaseScoreBy(GAME.ENEMY_KILL_POINTS);
-			} else {
-				gameOver();
+				return;
 			}
+			gameOver();
 		}
 	});
 }
@@ -337,7 +337,7 @@ export function updateKillerRoots(game) {
 	});
 }
 
-export function updatePlayerMovement(game, scoreEl) {
+export function updatePlayerMovement(game) {
 	if (keys.right.pressed && game.potato.x < PLAYER.RIGHT_BORDER) {
 		game.potato.velocity.x = PLAYER.HORIZONTAL_VELOCITY;
 	} else if (keys.left.pressed && game.potato.x > PLAYER.LEFT_BORDER) {
