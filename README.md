@@ -21,3 +21,9 @@ TODOs:
     * Collect 1000 PowerUps, 5000 PowerUps, 10,000 PowerUps
     * Destroy 1000 Platforms, 10,000 Platforms, 100,000 Platforms
     * Kill Enemies While being Invincible 50, 500, 1000
+
+- Shop:
+  * Add shop to buy magic items like Revive, using Coins
+  * Add floating Coins on Platforms that can be grabbed and be used in the shop
+
+- Add Spikes on (big enough) Platforms?
