@@ -28,6 +28,7 @@ import { Roots } from '../entities/Roots.js';
 import { KillerRoot } from '../entities/KillerRoot.js';
 import { GameManager } from './game-manager.service.js';
 import { PowerUp } from '../entities/PowerUp.js';
+import { getAchievementsLevels, incrementGameAchievement, updateAchievementsReached } from './achievements.service.js';
 
 let backgroundImage = new Image();
 
@@ -75,6 +76,8 @@ export function gameOverModal() {
 
 export function gameOver() {
 	const game = GameManager.getInstance();
+	incrementGameAchievement('score', game.score);
+	updateAchievementsReached(game.achievements);
 	cancelAnimationFrame(game.animationId);
 	gameOverModal();
 	removeResizeListener();
@@ -115,6 +118,10 @@ function generateSpider(lava) {
 	spider.setOnDestroy(enemyInstance => {
 		// const idx = lava.enemies.indexOf(enemyInstance);
 		// lava.enemies.splice(idx, 1);
+		incrementGameAchievement('killSpiders');
+		if (potatoHasPowerUp('invincible')) {
+			incrementGameAchievement('killEnemiesWithInvincibility');
+		}
 		enemyInstance.fall();
 	});
 	spider.patrolPlatform(lava);
@@ -375,6 +382,9 @@ function generatePowerUp(lava) {
 	powerUp.setOnDestroy(powerUpInstance => {
 		const idx = lava.powerUps.indexOf(powerUpInstance);
 		lava.powerUps.splice(idx, 1);
+		const powerUpAchievementName = POWER_UP.TYPE_TO_ACHIEVEMENT_NAME[type];
+		incrementGameAchievement('collectPowerUp');
+		incrementGameAchievement(powerUpAchievementName);
 	});
 	powerUp.float();
 	return powerUp;
@@ -406,6 +416,7 @@ function generateLava(game) {
 		increaseScoreBy(GAME.PLATFORM_DESTROY_POINTS);
 		addParticles(lavaInstance);
 		lavaInstance.enemies.forEach(enemy => enemy?.onDestroy(enemy));
+		incrementGameAchievement('destroyPlatforms');
 	});
 	return lava;
 }

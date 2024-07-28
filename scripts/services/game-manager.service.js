@@ -11,6 +11,7 @@ export class GameManager {
 	killerRootsIntervalId = null;
 	scrollOffset = GAME.INITIAL_SCROLL_OFFSET;
 	score = GAME.INITIAL_SCORE;
+	achievements = GAME.INITIAL_ACHIEVEMENTS;
 
 	static getInstance() {
 		if (!this.instance) {

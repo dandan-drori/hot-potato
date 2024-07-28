@@ -29,6 +29,16 @@ export const GAME = {
 	INITIAL_WINDOW: 20,
 	DISCARD_AFTER: 10,
 	AHEAD_WINDOW: 20,
+	INITIAL_ACHIEVEMENTS: {
+		killSpiders: 0,
+		score: 0,
+		collectTripleJump: 0,
+		collectDoubleScore: 0,
+		collectInvincibility: 0,
+		collectPowerUp: 0,
+		destroyPlatforms: 0,
+		killEnemiesWithInvincibility: 0,
+	}
 };
 
 export const PLAYER = {
@@ -66,6 +76,11 @@ export const POWER_UP = {
 		'double-score': '../../assets/images/double-score.png',
 		'triple-jump': '../../assets/images/triple-jump.png',
 	},
+	TYPE_TO_ACHIEVEMENT_NAME: {
+		invincible: 'collectInvincibility',
+		'double-score': 'collectDoubleScore',
+		'triple-jump': 'collectTripleJump',
+	},
 	CHANCE_TO_GENERATE: 10,
 	INITIAL_VELOCITY_X: 0,
 	INITIAL_VELOCITY_Y: 0,
@@ -74,3 +89,28 @@ export const POWER_UP = {
 export const KILLER_ROOT = {
 	INITIAL_VERTICAL_VELOCITY: -20,
 };
+
+export const ACHIEVEMENTS = {
+	game: {
+		killSpiders: [15, 25, 50],
+		score: [50000, 100000, 200000],
+		collectTripleJump: [5, 10, 25],
+		collectDoubleScore: [5, 10, 25],
+		collectInvincibility: [5, 10, 25],
+		collectPowerUp: [10, 20, 50],
+		destroyPlatforms: [50, 100, 200],
+		killEnemiesWithInvincibility: [10, 25, 50],
+	},
+	overall: {
+		killSpiders: [100, 500, 1000],
+		score: [500000, 1000000, 5000000],
+		collectTripleJump: [50, 500, 1000],
+		collectDoubleScore: [50, 500, 1000],
+		collectInvincibility: [50, 500, 1000],
+		collectPowerUp: [1000, 5000, 10000],
+		destroyPlatforms: [1000, 10000, 100000],
+		killEnemiesWithInvincibility: [50, 500, 1000],
+	},
+}
+
+export const ACHIEVEMENTS_STORAGE_KEY = 'achievements';
