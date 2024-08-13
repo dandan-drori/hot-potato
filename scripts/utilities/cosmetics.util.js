@@ -5,6 +5,7 @@ import { showAchievementsPage } from '../services/achievements.service.js';
 
 export function goToHome() {
     navigate({ gameOverModal: 'none', score: 'none', home: 'block', achievementsPage: 'none' });
+    ElementsService.getInstance().getElement('body').style.backgroundColor = 'unset';
 }
 
 export function registerEventListeners() {
